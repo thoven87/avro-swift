@@ -11,6 +11,7 @@ class AvroUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 	var itemSchema: AvroSchema
 	var writer: AvroWriter
 	var tempWriter = AvroWriter()
+	private var finalized = false
 
 	init(codingPath: [CodingKey], itemSchema: AvroSchema, writer: AvroWriter) {
 		self.codingPath = codingPath
@@ -24,10 +25,18 @@ class AvroUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 		count += 1
 	}
 
-	deinit {
+	func finalize() {
+		guard !finalized else { return }
 		writer.writeLong(Int64(count)) // Length
 		writer.writeRawBlock(tempWriter.data.map { UInt8($0) })
 		writer.writeLong(0) // Termination
+		finalized = true
+	}
+
+	deinit {
+		if !finalized {
+			assertionFailure("UnkeyedEncodingContainer was discarded before finalize() was called")
+		}
 	}
 
 	func encodeNil() throws { fatalError() }

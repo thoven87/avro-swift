@@ -90,14 +90,13 @@ public struct GenerateAvroSchema: MemberMacro {
 			case "Data", "[UInt8]":
 				return ".bytes"
 			default:
-			if let nested = resolveNested(type: type) {
+				guard let nested = resolveNested(type: type) else {
+					return "\(type).avroSchema"
+				}
 				return nested
-			} else {
-				return "\(type).avroSchema"
-			}
 		}
 	}
-	
+
 	private static func resolveNested(type: String) -> String? {
 		if type.starts(with: "[") {
 			let underlying = String(type.split(separator: "[").last!.dropLast())

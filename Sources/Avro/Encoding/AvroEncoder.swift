@@ -54,7 +54,8 @@ final class _AvroEncodingBox: Encoder {
 		guard case .array(let items) = schema else {
 			preconditionFailure("Expected array for unkeyed container")
 		}
-		return AvroUnkeyedEncodingContainer(codingPath: codingPath, itemSchema: items, writer: writer)
+		let real = AvroUnkeyedEncodingContainer(codingPath: codingPath, itemSchema: items, writer: writer)
+		return FinalizingUnkeyedContainer(base: real)
 	}
 
 	func singleValueContainer() -> any SingleValueEncodingContainer {
@@ -62,4 +63,43 @@ final class _AvroEncodingBox: Encoder {
 
 	}
 
+	private final class FinalizingUnkeyedContainer: UnkeyedEncodingContainer {
+		private let base: AvroUnkeyedEncodingContainer
+
+		init(base: AvroUnkeyedEncodingContainer) {
+			self.base = base
+		}
+
+		var codingPath: [CodingKey] {
+			base.codingPath
+		}
+
+		var count: Int {
+			base.count
+		}
+
+		func encode<T>(_ value: T) throws where T: Encodable {
+			try base.encode(value)
+		}
+
+		func encodeNil() throws {
+			try base.encodeNil()
+		}
+
+		func nestedContainer<NestedKey>(keyedBy: NestedKey.Type) -> KeyedEncodingContainer<NestedKey> where NestedKey: CodingKey {
+			base.nestedContainer(keyedBy: NestedKey.self)
+		}
+
+		func nestedUnkeyedContainer() -> UnkeyedEncodingContainer {
+			base.nestedUnkeyedContainer()
+		}
+
+		func superEncoder() -> Encoder {
+			base.superEncoder()
+		}
+
+		deinit {
+			base.finalize()
+		}
+	}
 }

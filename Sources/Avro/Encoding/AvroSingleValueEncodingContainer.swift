@@ -25,7 +25,16 @@ struct AvroSingleValueEncodingContainer: SingleValueEncodingContainer {
 			case .boolean:
 				writer.writeBoolean(value as! Bool)
 			case .int:
-				writer.writeInt(value as! Int32)
+				if let v = value as? Int {
+					writer.writeInt(Int32(v))
+				} else if let v = value as? Int32 {
+					writer.writeInt(v)
+				} else {
+					throw EncodingError.invalidValue(
+						value,
+						EncodingError.Context(codingPath: codingPath, debugDescription: "Expected Int")
+					)
+				}
 			case .long:
 				writer.writeLong(value as! Int64)
 			case .float:

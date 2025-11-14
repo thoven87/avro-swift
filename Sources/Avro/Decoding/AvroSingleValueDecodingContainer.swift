@@ -23,7 +23,7 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 	}
 
 	func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
-		return switch schema {
+		switch schema {
 			case .null:
 				decodeNil() as! T
 			case .boolean:

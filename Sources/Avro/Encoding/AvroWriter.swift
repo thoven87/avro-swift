@@ -21,11 +21,11 @@ class AvroWriter {
 	func writeBoolean(_ value: Bool) {
 		data.append(value ? 1 : 0)
 	}
-	
+
 	func writeRaw(_ value: UInt8) {
 		data.append(value)
 	}
-	
+
 	func writeRawBlock(_ value: [UInt8]) {
 		data.append(contentsOf: value)
 	}
