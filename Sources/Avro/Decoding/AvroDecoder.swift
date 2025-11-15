@@ -51,7 +51,11 @@ final class _AvroDecodingBox: Decoder {
 		return .init(container)
 	}
 	func unkeyedContainer() -> UnkeyedDecodingContainer {
-		fatalError("Not implemented")
+		guard case .array(let items) = schema else {
+			preconditionFailure("Expected array for unkeyed container")
+		}
+		return AvroUnkeyedDecodingContainer(reader: reader, schema: items, codingPath: codingPath)
+
 	}
 	func singleValueContainer() -> SingleValueDecodingContainer {
 		AvroSingleValueDecodingContainer(schema: schema, reader: &reader, codingPath: [])

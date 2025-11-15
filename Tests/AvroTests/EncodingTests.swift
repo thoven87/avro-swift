@@ -109,7 +109,7 @@ struct RecordEncodingTests {
 	}
 
 	@Test("Array record")
-	func ArrayOfStringsEncode() throws {
+	func arrayOfStringsEncode() throws {
 		let value = ArrayFixture.instance
 		let avroData = try AvroEncoder(schema: ArrayFixture.Def.avroSchema).encode(value)
 		let expected = ArrayFixture.serialized
@@ -117,7 +117,7 @@ struct RecordEncodingTests {
 	}
 
 	@Test("Double Array record")
-	func DoubleArrayEncode() throws {
+	func doubleArrayEncode() throws {
 		let value = DoubleArrayFixture.instance
 		let avroData = try AvroEncoder(schema: DoubleArrayFixture.Def.avroSchema).encode(value)
 		let expected = DoubleArrayFixture.serialized

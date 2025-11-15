@@ -25,23 +25,27 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 	func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
 		switch schema {
 			case .null:
-				decodeNil() as! T
+				return decodeNil() as! T
 			case .boolean:
-				try reader.readBoolean() as! T
+				return try reader.readBoolean() as! T
 			case .int:
-				try reader.readInt() as! T
+				let value = try reader.readInt()
+				guard T.self == Int.self else {
+					return value as! T
+				}
+				return Int(value) as! T
 			case .long:
-				try reader.readLong() as! T
+				return try reader.readLong() as! T
 			case .float:
-				try reader.readFloat() as! T
+				return try reader.readFloat() as! T
 			case .double:
-				try reader.readDouble() as! T
+				return try reader.readDouble() as! T
 			case .bytes:
-				try reader.readBytes() as! T
+				return try reader.readBytes() as! T
 			case .string:
-				try reader.readString() as! T
+				return try reader.readString() as! T
 			case .logical(let logicalType, _):
-				try decodeLogical(as: logicalType)
+				return try decodeLogical(as: logicalType)
 			default:
 				fatalError("Unsupported schema for single value decoding: \(schema)")
 		}

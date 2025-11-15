@@ -7,6 +7,7 @@
 import SwiftCompilerPlugin
 import SwiftDiagnostics
 import SwiftSyntax
+import Foundation
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 

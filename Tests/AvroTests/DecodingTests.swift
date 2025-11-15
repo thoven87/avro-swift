@@ -20,6 +20,10 @@ struct PrimitiveDecodingTestss {
 		let decodedAvro = try AvroDecoder(schema: schema).decode(String.self, from: data)
 		#expect(decodedAvro == "foo")
 	}
+}
+
+@Suite("Record Decoding Tests")
+struct RecordDecodingTests {
 
 	@Test("Record primitives")
 	func recordPrimitives() throws {
@@ -122,6 +126,27 @@ struct PrimitiveDecodingTestss {
 		let schema = LogicalDecimalFixture.Def.avroSchema
 		let decodedAvro = try AvroDecoder(schema: schema).decode(LogicalDecimalFixture.Def.self, from: data)
 		#expect(decodedAvro == person)
+	}
 
+	@Test("Array record")
+	func arrayOfStringsDecode() throws {
+		let data = ArrayFixture.serialized
+		
+		let value = ArrayFixture.instance
+		
+		let schema = ArrayFixture.Def.avroSchema
+		let decodedAvro = try AvroDecoder(schema: schema).decode(ArrayFixture.Def.self, from: data)
+		#expect(decodedAvro == value)
+	}
+	
+	@Test("Double Array record")
+	func doubleArrayDecode() throws {
+		let data = DoubleArrayFixture.serialized
+		
+		let value = DoubleArrayFixture.instance
+		
+		let schema = DoubleArrayFixture.Def.avroSchema
+		let decodedAvro = try AvroDecoder(schema: schema).decode(DoubleArrayFixture.Def.self, from: data)
+		#expect(decodedAvro == value)
 	}
 }
