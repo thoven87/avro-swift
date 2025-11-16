@@ -55,7 +55,7 @@ struct RecordEncodingTests {
 		#expect(avroData == expected)
 	}
 
-	@Test("Logical Type time-millis", .disabled("Logical Type not implemented"))
+	@Test("Logical Type time-millis")
 	func logicalTypeTimeMillisEncode() throws {
 		let value = LogicalTimeMillisFixture.instance
 		let avroData = try AvroEncoder(schema: LogicalTimeMillisFixture.Def.avroSchema).encode(value)
@@ -73,7 +73,7 @@ struct RecordEncodingTests {
 		#expect(avroData == expected)
 	}
 
-	@Test("Logical Type time-micros", .disabled("Logical Type not implemented"))
+	@Test("Logical Type time-micros")
 	func logicalTypeTimeMicrosEncode() throws {
 		let value = LogicalTimeMicrosFixture.instance
 		let avroData = try AvroEncoder(schema: LogicalTimeMicrosFixture.Def.avroSchema).encode(value)
@@ -91,7 +91,7 @@ struct RecordEncodingTests {
 		#expect(avroData == expected)
 	}
 
-	@Test("Logical Type uuid", .disabled("Logical Type not implemented"))
+	@Test("Logical Type uuid")
 	func logicalTypeUUIDEncode() throws {
 		let value = LogicalUUIDFixture.instance
 		let avroData = try AvroEncoder(schema: LogicalUUIDFixture.Def.avroSchema).encode(value)

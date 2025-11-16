@@ -58,7 +58,7 @@ struct RecordDecodingTests {
 
 	}
 
-	@Test("Logical Type time-millis", .disabled("Logical Type not implemented"))
+	@Test("Logical Type time-millis")
 	func logicalTypeTimeMillis() throws {
 		let data = LogicalTimeMillisFixture.serialized
 
@@ -82,7 +82,7 @@ struct RecordDecodingTests {
 
 	}
 
-	@Test("Logical Type time-micros", .disabled("Logical Type not implemented"))
+	@Test("Logical Type time-micros")
 	func logicalTypeTimeMicros() throws {
 		let data = LogicalTimeMicrosFixture.serialized
 
@@ -106,7 +106,7 @@ struct RecordDecodingTests {
 
 	}
 
-	@Test("Logical Type uuid", .disabled("Logical Type not implemented"))
+	@Test("Logical Type uuid")
 	func logicalTypeUUID() throws {
 		let data = LogicalUUIDFixture.serialized
 

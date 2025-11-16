@@ -84,13 +84,47 @@ struct AvroSingleValueEncodingContainer: SingleValueEncodingContainer {
 				fatalError("Timestamp micros logical type not implemented")
 
 			case .timeMillis:
-				fatalError("Time millis logical type not implemented")
+				if let value = v as? Int {
+					writer.writeInt(Int32(value))
+				} else if let value = v as? Int32 {
+					writer.writeInt(value)
+				} else {
+					throw EncodingError.invalidValue(
+						v,
+						EncodingError.Context(codingPath: codingPath, debugDescription: "Can only encode Int or Int32")
+					)
+				}
 
 			case .timeMicros:
-				fatalError("Time micros logical type not implemented")
+				if let value = v as? Int {
+					writer.writeLong(Int64(value))
+				} else if let value = v as? Int64 {
+					writer.writeLong(value)
+				} else {
+					throw EncodingError.invalidValue(
+						v,
+						EncodingError.Context(codingPath: codingPath, debugDescription: "Can only encode Int or Int32")
+					)
+				}
 
 			case .uuid:
-				fatalError("uuid logical type not implemented")
+				if let value = v as? UUID {
+					writer.writeString(value.uuidString)
+				} else if let value = v as? String {
+					let uuidCheck = UUID(uuidString: value)
+					guard uuidCheck != nil else {
+						throw EncodingError.invalidValue(
+							v,
+							EncodingError.Context(codingPath: codingPath, debugDescription: "Invalid UUID string")
+						)
+					}
+					writer.writeString(value)
+				} else {
+					throw EncodingError.invalidValue(
+						v,
+						EncodingError.Context(codingPath: codingPath, debugDescription: "Can only encode UUID or String")
+					)
+				}
 
 			case .decimal(_, _):
 				fatalError("Decimal logical type not implemented")

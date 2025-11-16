@@ -223,7 +223,7 @@ public struct GenerateAvroSchema: MemberMacro {
 			case ".timestampMillis":
 				return ["Int64", "Date"]
 			case ".timeMicros":
-				return ["Int64"]
+				return ["Int", "Int64"]
 			case ".timestampMicros":
 				return ["Int64", "Date"]
 			case ".uuid":

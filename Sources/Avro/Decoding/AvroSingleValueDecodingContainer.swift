@@ -47,7 +47,10 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 			case .logical(let logicalType, _):
 				return try decodeLogical(as: logicalType)
 			default:
-				fatalError("Unsupported schema for single value decoding: \(schema)")
+				throw DecodingError.typeMismatch(
+					T.self,
+					DecodingError.Context(codingPath: codingPath, debugDescription: "Unsupported schema")
+				)
 		}
 	}
 
@@ -59,15 +62,47 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 			case .date:
 				return try Double(reader.readInt()) * 86400 + referenceOffset as! T
 			case .timeMillis:
-				fatalError("Time millis logical type not implemented")
+				if T.self == Int.self {
+					return try Int(reader.readInt()) as! T
+				} else if T.self == Int32.self {
+					return try reader.readInt() as! T
+				} else {
+					throw DecodingError.typeMismatch(
+						T.self,
+						DecodingError.Context(codingPath: codingPath, debugDescription: "Can only decode Int or Int32")
+					)
+				}
 			case .timestampMillis:
 				fatalError("Timestamp millis logical type not implemented")
 			case .timeMicros:
-				fatalError("Time micros logical type not implemented")
+				if T.self == Int.self {
+					return try Int(reader.readLong()) as! T
+				} else if T.self == Int64.self {
+					return try reader.readLong() as! T
+				} else {
+					throw DecodingError.typeMismatch(
+						T.self,
+						DecodingError.Context(codingPath: codingPath, debugDescription: "Can only decode Int or Int64")
+					)
+				}
 			case .timestampMicros:
 				fatalError("timestampMicros logical type not implemented")
 			case .uuid:
-				fatalError("UUID logical type not implemented")
+				if T.self == UUID.self {
+					return UUID(uuidString: try reader.readString()) as! T
+				} else if T.self == String.self {
+					let value = try reader.readString()
+					let uuidCheck = UUID(uuidString: value)
+					guard uuidCheck != nil else {
+						throw DecodingError.dataCorruptedError(in: self, debugDescription: "Invalid UUID String")
+					}
+					return value as! T
+				} else {
+					throw DecodingError.typeMismatch(
+						T.self,
+						DecodingError.Context(codingPath: codingPath, debugDescription: "Can only decode UUID or String")
+					)
+				}
 			case .decimal(_, _):
 				fatalError("Decimal logical type not implemented")
 		}

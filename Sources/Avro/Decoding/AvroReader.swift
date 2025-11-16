@@ -37,7 +37,7 @@ class AvroReader {
 		guard offset + count <= data.count else { throw AvroError.endOfData }
 		let slice = data[offset ..< offset + count]
 		offset += count
-		return Data(slice) // FIXME: https://github.com/swiftlang/swift-foundation/issues/1601
+		return Data(slice) // Have to make new Data to reset the startIndex to 0
 	}
 
 	@inline(__always)
