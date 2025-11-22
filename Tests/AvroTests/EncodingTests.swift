@@ -140,4 +140,12 @@ struct RecordEncodingTests {
 		let expected = ComplexFixture.serialized
 		#expect(avroData.sorted() == expected.sorted())
 	}
+
+	@Test("Enum Record")
+	func enumRecord() throws {
+		let value = EnumFixture.instance
+		let avroData = try AvroEncoder(schema: EnumFixture.Def.avroSchema).encode(value)
+		let expected = EnumFixture.serialized
+		#expect(avroData == expected)
+	}
 }

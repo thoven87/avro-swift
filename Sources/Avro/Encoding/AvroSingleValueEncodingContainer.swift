@@ -47,6 +47,14 @@ struct AvroSingleValueEncodingContainer: SingleValueEncodingContainer {
 				writer.writeString(value as! String)
 			case .logical(let logicalType, _):
 				try encodeLogical(value, as: logicalType)
+			case .enum(_, _, _, _, let symbols, _):
+				guard let i = symbols.firstIndex(of: value as! String) else {
+					throw EncodingError.invalidValue(
+						value,
+						EncodingError.Context(codingPath: codingPath, debugDescription: "Value not in enum")
+					)
+				}
+				writer.writeInt(Int32(i))
 
 			default:
 				fatalError("Unsupported schema for single value encoding: \(schema)")

@@ -12,6 +12,7 @@ import SwiftSyntaxMacros
 struct AvroPlugin: CompilerPlugin {
 	let providingMacros: [Macro.Type] = [
 		GenerateAvroSchema.self,
+		GenerateAvroEnum.self,
 		LogicalTypeAttribute.self
 	]
 }

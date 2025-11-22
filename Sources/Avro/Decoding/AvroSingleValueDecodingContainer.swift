@@ -71,6 +71,8 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 				return try reader.readString() as! T
 			case .logical(let logicalType, _):
 				return try decodeLogical(as: logicalType)
+			case .enum(_, _, _, _, let symbols, _):
+				return symbols[Int(try reader.readInt())] as! T
 			default:
 				throw DecodingError.typeMismatch(
 					T.self,

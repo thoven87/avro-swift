@@ -169,4 +169,13 @@ struct RecordDecodingTests {
 		#expect(decodedAvro == value)
 
 	}
+
+	@Test("Enum record")
+	func enumRecord() throws {
+		let data = EnumFixture.serialized
+		let value = EnumFixture.instance
+		let schema = EnumFixture.Def.avroSchema
+		let decodedAvro = try AvroDecoder(schema: schema).decode(EnumFixture.Def.self, from: data)
+		#expect(decodedAvro == value)
+	}
 }

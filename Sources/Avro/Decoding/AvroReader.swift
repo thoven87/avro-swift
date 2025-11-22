@@ -182,6 +182,8 @@ class AvroReader {
 				}
 			case .logical(_, let underlying):
 				try skip(schema: underlying)
+			case .enum:
+				_ = try readInt()
 		}
 	}
 }
