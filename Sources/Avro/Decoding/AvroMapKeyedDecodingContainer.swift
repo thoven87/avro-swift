@@ -1,5 +1,5 @@
 //
-//  AvroUnkeyedDecodingContainer.swift
+//  AvroMapKeyedEncodingContainer.swift
 //  avro-swift
 //
 //  Created by Felix Ruppert on 15.11.25.
@@ -38,18 +38,23 @@ class AvroMapKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProto
 			if blockCount == 0 {
 				tmpIsAtEnd = true
 				break
-			} else if blockCount < 0 {
-				fatalError("Negative blocks not implemented")
+			}
+
+			var n: Int
+			if blockCount < 0 {
+				n = Int(-blockCount)
+				let _ = try localReader.readLong()
 			} else {
-				let n = Int(blockCount)
-				localCount += n
-				for _ in 0 ..< n {
-					let keyString = try localReader.readString()
-					if let k = Key(stringValue: keyString) {
-						tmpKeys.append(k)
-					}
-					try localReader.skip(schema: itemSchema)
+				n = Int(blockCount)
+			}
+
+			localCount += n
+			for _ in 0 ..< n {
+				let keyString = try localReader.readString()
+				if let k = Key(stringValue: keyString) {
+					tmpKeys.append(k)
 				}
+				try localReader.skip(schema: itemSchema)
 			}
 		}
 
@@ -109,15 +114,22 @@ class AvroMapKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProto
 	func startOfBlock(withCount blockCount: Int64) {
 		if blockCount == 0 {
 			isAtEnd = true
-		} else if blockCount < 0 {
-			fatalError("Negative block sizes not implemented")
+			return
+		}
+
+		var itemsInBlock: Int
+		if blockCount < 0 {
+			itemsInBlock = Int(-blockCount)
+			let _ = try? reader.readLong()
 		} else {
-			remainingInBlock = Int(blockCount)
-			if count == nil {
-				count = Int(blockCount)
-			} else {
-				count? += Int(blockCount)
-			}
+			itemsInBlock = Int(blockCount)
+		}
+
+		remainingInBlock = itemsInBlock
+		if count == nil {
+			count = itemsInBlock
+		} else {
+			count? += itemsInBlock
 		}
 	}
 

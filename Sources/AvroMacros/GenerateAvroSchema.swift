@@ -229,7 +229,7 @@ public struct GenerateAvroSchema: MemberMacro {
 			case ".uuid":
 				return ["String", "UUID"]
 			case ".decimal":
-				return ["Data", "[UInt8]", "Decimal"]
+				return ["Decimal"]
 			default:
 				return nil // Unknown logical type; skip validation
 		}

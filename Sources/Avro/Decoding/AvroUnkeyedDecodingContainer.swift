@@ -38,15 +38,22 @@ class AvroUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 	func startOfBlock(withCount blockCount: Int64) {
 		if blockCount == 0 {
 			_isAtEnd = true
-		} else if blockCount < 0 {
-			fatalError("Negative block sizes not implemented")
+			return
+		}
+
+		var itemsInBlock: Int
+		if blockCount < 0 {
+			itemsInBlock = Int(-blockCount)
+			let _ = try? reader.readLong()
 		} else {
-			remainingInBlock = Int(blockCount)
-			if count == nil {
-				count = Int(blockCount)
-			} else {
-				count? += Int(blockCount)
-			}
+			itemsInBlock = Int(blockCount)
+		}
+
+		remainingInBlock = itemsInBlock
+		if count == nil {
+			count = itemsInBlock
+		} else {
+			count? += itemsInBlock
 		}
 	}
 

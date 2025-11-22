@@ -50,8 +50,12 @@ final class _AvroDecodingBox: Decoder {
 			case .map(let itemSchema):
 				let container = AvroMapKeyedDecodingContainer<Key>(reader: reader, schema: itemSchema, codingPath: [])
 				return .init(container)
+
+			case .logical(type: .decimal, underlying: .bytes):
+				fatalError("Decimals are not handled at the moment")
+
 			default:
-				fatalError("Schema is not a record or map")
+				fatalError("Schema is not a record or map but a \(schema)")
 		}
 
 	}

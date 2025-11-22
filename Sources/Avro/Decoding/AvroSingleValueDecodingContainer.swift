@@ -22,6 +22,31 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 		true
 	}
 
+	@inline(__always)
+	private func int64FromAvroDecimalBytes(_ data: Data) -> Int64? {
+		guard !data.isEmpty, data.count <= 8 else {
+			return nil // too big for Int64 or empty
+		}
+
+		var value: Int64 = 0
+		for byte in data {
+			value = (value << 8) | Int64(UInt8(byte))
+		}
+
+		if data.count < 8 {
+			let bits = data.count * 8
+			let signBitIndex = bits - 1
+			let signBitMask: Int64 = 1 << signBitIndex
+
+			if (value & signBitMask) != 0 {
+				let extensionMask: Int64 = ~((Int64(1) << bits) - 1)
+				value |= extensionMask
+			}
+		}
+
+		return value
+	}
+
 	func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
 		switch schema {
 			case .null:
@@ -103,8 +128,36 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 						DecodingError.Context(codingPath: codingPath, debugDescription: "Can only decode UUID or String")
 					)
 				}
-			case .decimal(_, _):
-				fatalError("Decimal logical type not implemented")
+			case .decimal(let scale, let precision):
+				guard T.self == Decimal.self else {
+					throw DecodingError.typeMismatch(
+						T.self,
+						DecodingError.Context(
+							codingPath: codingPath,
+							debugDescription: "Can only decode Float, Decimal or Double"
+						)
+					)
+				}
+				let bytes = try reader.readBytes()
+				guard let unscaled = int64FromAvroDecimalBytes(bytes) else {
+					throw DecodingError.dataCorruptedError(in: self, debugDescription: "Invalid Decimal")
+				}
+				var result = Decimal(unscaled)
+				if scale > 0 {
+					var divisor = Decimal(1)
+					for _ in 0 ..< scale {
+						divisor *= 10
+					}
+					result /= divisor
+				}
+				guard result.fits(precision: precision, scale: scale) else {
+					throw DecodingError.typeMismatch(
+						T.self,
+						DecodingError.Context(codingPath: codingPath, debugDescription: "Scale or precision not matching")
+					)
+				}
+				return result as! T
+
 		}
 	}
 

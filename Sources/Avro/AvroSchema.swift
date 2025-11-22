@@ -18,10 +18,15 @@ indirect public enum AvroSchema: Equatable, Sendable {
 	//
 	/// A field of an Avro schema.
 	public struct Field: Equatable, Sendable {
+		/// The field name.
 		public let name: String
+		/// The doc of the field.
 		public let doc: String? = nil
+		/// The datatype.
 		public let type: AvroSchema
+		/// The order of the field.
 		public let order: Order = .ignore
+		/// Aliases of the field.
 		public let aliases: [String]? = nil
 		// FIXME: Defaults
 		/// Initialize a new field.
