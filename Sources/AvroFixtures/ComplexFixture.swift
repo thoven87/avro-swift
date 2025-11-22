@@ -49,23 +49,23 @@ public enum ComplexFixture {
 		fields: [
 			Avro.AvroSchema.Field(
 				name: "eventId",
-				type: Avro.AvroSchema.string,
+				type: Avro.AvroSchema.string
 			),
 			Avro.AvroSchema.Field(
 				name: "timestamp",
-				type: Avro.AvroSchema.long,
+				type: Avro.AvroSchema.long
 			),
 			Avro.AvroSchema.Field(
 				name: "metadata",
-				type: Avro.AvroSchema.map(values: Avro.AvroSchema.string),
+				type: Avro.AvroSchema.map(values: Avro.AvroSchema.string)
 			),
 			Avro.AvroSchema.Field(
 				name: "tags",
-				type: Avro.AvroSchema.array(items: Avro.AvroSchema.string),
+				type: Avro.AvroSchema.array(items: Avro.AvroSchema.string)
 			),
 			Avro.AvroSchema.Field(
 				name: "metrics",
-				type: Avro.AvroSchema.map(values: Avro.AvroSchema.double),
+				type: Avro.AvroSchema.map(values: Avro.AvroSchema.double)
 			),
 			Avro.AvroSchema.Field(
 				name: "nestedData",
@@ -75,22 +75,22 @@ public enum ComplexFixture {
 					fields: [
 						Avro.AvroSchema.Field(
 							name: "userId",
-							type: Avro.AvroSchema.long,
+							type: Avro.AvroSchema.long
 						),
 						Avro.AvroSchema.Field(
 							name: "properties",
-							type: Avro.AvroSchema.map(values: Avro.AvroSchema.array(items: Avro.AvroSchema.string)),
+							type: Avro.AvroSchema.map(values: Avro.AvroSchema.array(items: Avro.AvroSchema.string))
 						),
 						Avro.AvroSchema.Field(
 							name: "scores",
-							type: Avro.AvroSchema.array(items: Avro.AvroSchema.float),
+							type: Avro.AvroSchema.array(items: Avro.AvroSchema.float)
 						)
 					]
-				),
+				)
 			),
 			Avro.AvroSchema.Field(
 				name: "arrayOfMaps",
-				type: Avro.AvroSchema.array(items: Avro.AvroSchema.map(values: Avro.AvroSchema.int)),
+				type: Avro.AvroSchema.array(items: Avro.AvroSchema.map(values: Avro.AvroSchema.int))
 			),
 			Avro.AvroSchema.Field(
 				name: "deeplyNested",
@@ -103,17 +103,17 @@ public enum ComplexFixture {
 								fields: [
 									Avro.AvroSchema.Field(
 										name: "id",
-										type: Avro.AvroSchema.int,
+										type: Avro.AvroSchema.int
 									),
 									Avro.AvroSchema.Field(
 										name: "data",
-										type: Avro.AvroSchema.bytes,
+										type: Avro.AvroSchema.bytes
 									)
 								]
 							)
 						)
 					)
-				),
+				)
 			),
 			Avro.AvroSchema.Field(
 				name: "mixedArray",
@@ -124,19 +124,19 @@ public enum ComplexFixture {
 						fields: [
 							Avro.AvroSchema.Field(
 								name: "itemId",
-								type: Avro.AvroSchema.string,
+								type: Avro.AvroSchema.string
 							),
 							Avro.AvroSchema.Field(
 								name: "values",
-								type: Avro.AvroSchema.map(values: Avro.AvroSchema.double),
+								type: Avro.AvroSchema.map(values: Avro.AvroSchema.double)
 							),
 							Avro.AvroSchema.Field(
 								name: "nested",
-								type: Avro.AvroSchema.array(items: Avro.AvroSchema.map(values: Avro.AvroSchema.boolean)),
+								type: Avro.AvroSchema.array(items: Avro.AvroSchema.map(values: Avro.AvroSchema.boolean))
 							)
 						]
 					)
-				),
+				)
 			)
 		]
 	)

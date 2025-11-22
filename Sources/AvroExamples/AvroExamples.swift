@@ -13,7 +13,7 @@ struct AvroExamples {
 	static func main() throws {
 		let user = User(name: "John Doe", age: 22, dob: Date(), username: "johndoe", address: Address(street: "John Doe Street"))
 		let decodedAvro = try AvroEncoder(schema: User.avroSchema).encode(user)
-		let roundTrip = try AvroDecoder(schema: User.avroSchema).decode(User.self, from: decodedAvro)
+		let _ = try AvroDecoder(schema: User.avroSchema).decode(User.self, from: decodedAvro)
 	}
 }
 
