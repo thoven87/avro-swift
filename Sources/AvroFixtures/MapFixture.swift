@@ -9,7 +9,7 @@ import Avro
 import Foundation
 
 public enum MapFixture {
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let stringToInt: [String: Int]
 	}

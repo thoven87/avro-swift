@@ -7,7 +7,7 @@
 
 import Foundation
 
-class AvroUnkeyedDecodingContainer: UnkeyedDecodingContainer {
+final class AvroUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 	var codingPath: [CodingKey]
 	var itemSchema: AvroSchema
 	var reader: AvroReader

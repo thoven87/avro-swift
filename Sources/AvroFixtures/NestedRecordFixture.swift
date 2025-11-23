@@ -9,7 +9,7 @@ import Avro
 import Foundation
 
 public enum NestedRecordFixture {
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let id: Int64
 		let name: String

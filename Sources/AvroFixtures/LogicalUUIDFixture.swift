@@ -10,7 +10,7 @@ import Foundation
 
 public enum LogicalUUIDFixture {
 
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let name: String
 		@LogicalType(.uuid)

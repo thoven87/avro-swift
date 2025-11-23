@@ -10,27 +10,27 @@ import Foundation
 
 public enum ComplexFixture {
 
-	@Schema
+	@AvroSchema
 	public struct DeepRecord: Codable, Equatable, Sendable {
 		let id: Int32
 		let data: Data
 	}
 
-	@Schema
+	@AvroSchema
 	public struct MixedItem: Codable, Equatable, Sendable {
 		let itemId: String
 		let values: [String: Double]
 		let nested: [[String: Bool]]
 	}
 
-	@Schema
+	@AvroSchema
 	public struct NestedRecord: Codable, Equatable, Sendable {
 		let userId: Int64
 		let properties: [String: [String]]
 		let scores: [Float]
 	}
 
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let eventId: String
 		let timestamp: Int64

@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Benchmarks}",
+            "name": "Debug AvroBenchmarks",
+            "target": "AvroBenchmarks",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug AvroBenchmarks"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:Benchmarks}",
+            "name": "Release AvroBenchmarks",
+            "target": "AvroBenchmarks",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release AvroBenchmarks"
+        }
+    ]
+}

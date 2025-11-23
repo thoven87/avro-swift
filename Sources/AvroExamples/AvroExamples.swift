@@ -17,7 +17,7 @@ struct AvroExamples {
 	}
 }
 
-@Schema
+@AvroSchema
 struct User: Codable {
 	let name: String
 	let age: Int
@@ -26,7 +26,7 @@ struct User: Codable {
 	let address: Address
 }
 
-@Schema
+@AvroSchema
 struct Address: Codable {
 	let street: String
 }

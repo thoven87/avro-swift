@@ -7,7 +7,7 @@
 
 import Foundation
 
-class AvroReader {
+final class AvroReader {
 	let data: Data
 	private var offset: Int = 0
 
@@ -25,19 +25,36 @@ class AvroReader {
 	}
 
 	@inline(__always)
+	private func ensureAvailable(_ count: Int) throws {
+		guard count >= 0, offset + count <= data.count else {
+			throw AvroError.endOfData
+		}
+	}
+
+	@inline(__always)
 	private func readByte() throws -> UInt8 {
-		guard offset < data.count else { throw AvroError.endOfData }
-		let byte = data[offset]
+		try ensureAvailable(1)
+		let value = data.bytes.unsafeLoadUnaligned(fromByteOffset: offset, as: UInt8.self)
 		offset += 1
-		return byte
+		return value
+	}
+
+	@inline(__always)
+	private func loadInteger<T: FixedWidthInteger & BitwiseCopyable>(_ type: T.Type) throws -> T {
+		let size = MemoryLayout<T>.size
+		try ensureAvailable(size)
+		let raw = data.bytes.unsafeLoadUnaligned(fromByteOffset: offset, as: T.self)
+		offset &+= size
+		return T(littleEndian: raw)
 	}
 
 	@inline(__always)
 	private func readBytes(count: Int) throws -> Data {
-		guard offset + count <= data.count else { throw AvroError.endOfData }
-		let slice = data[offset ..< offset + count]
-		offset += count
-		return Data(slice) // Have to make new Data to reset the startIndex to 0
+		try ensureAvailable(count)
+		let start = offset
+		let end = offset + count
+		offset = end
+		return Data(data[start ..< end]) // Have to make new Data to reset the startIndex to 0
 	}
 
 	@inline(__always)
@@ -91,17 +108,13 @@ class AvroReader {
 	}
 
 	func readFloat() throws -> Float {
-		let bytes = try readBytes(count: 4)
-		return bytes.withUnsafeBytes { ptr in
-			Float(bitPattern: ptr.loadUnaligned(as: UInt32.self).littleEndian)
-		}
+		let bits: UInt32 = try loadInteger(UInt32.self)
+		return Float(bitPattern: bits)
 	}
 
 	func readDouble() throws -> Double {
-		let bytes = try readBytes(count: 8)
-		return bytes.withUnsafeBytes { ptr in
-			Double(bitPattern: ptr.loadUnaligned(as: UInt64.self).littleEndian)
-		}
+		let bits: UInt64 = try loadInteger(UInt64.self)
+		return Double(bitPattern: bits)
 	}
 
 	func readBytes() throws -> Data {
@@ -129,13 +142,21 @@ class AvroReader {
 			case .long:
 				_ = try readLong()
 			case .float:
-				_ = try readBytes(count: 4)
+				try ensureAvailable(4)
+				offset &+= 4
 			case .double:
-				_ = try readBytes(count: 8)
+				try ensureAvailable(8)
+				offset &+= 8
 			case .bytes:
-				_ = try readBytes()
+				let length = try readLong()
+				guard length >= 0 else { throw AvroError.negativeLength }
+				try ensureAvailable(Int(length))
+				offset &+= Int(length)
 			case .string:
-				_ = try readString()
+				let length = try readLong()
+				guard length >= 0 else { throw AvroError.negativeLength }
+				try ensureAvailable(Int(length))
+				offset &+= Int(length)
 			case .array(let items):
 				var isAtEnd = false
 				while !isAtEnd {

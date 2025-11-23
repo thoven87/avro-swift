@@ -5,7 +5,7 @@
 //  Created by Felix Ruppert on 09.11.25.
 //
 
-class AvroMapKeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
+final class AvroMapKeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
 	var codingPath: [CodingKey]
 	var writer: AvroWriter
 	var count: Int = 0

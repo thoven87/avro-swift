@@ -5,7 +5,7 @@
 //  Created by Felix Ruppert on 13.11.25.
 //
 
-class AvroUnkeyedEncodingContainer: UnkeyedEncodingContainer {
+final class AvroUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 	var codingPath: [CodingKey]
 	var count: Int = 0
 	var itemSchema: AvroSchema

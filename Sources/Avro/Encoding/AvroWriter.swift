@@ -7,8 +7,12 @@
 
 import Foundation
 
-class AvroWriter {
-	private(set) var data: Data = Data()
+final class AvroWriter {
+	private(set) var buffer = Data()
+
+	var data: Data {
+		buffer
+	}
 
 	@inline(__always)
 	private func zigZagEncode(_ value: Int64) -> UInt64 {
@@ -21,19 +25,19 @@ class AvroWriter {
 	}
 
 	func writeBoolean(_ value: Bool) {
-		data.append(value ? 1 : 0)
+		buffer.append(value ? 1 : 0)
 	}
 
 	func writeRaw(_ value: UInt8) {
-		data.append(value)
+		buffer.append(value)
 	}
 
 	func writeRawBlock(_ value: [UInt8]) {
-		data.append(contentsOf: value)
+		buffer.append(contentsOf: value)
 	}
 
 	func writeRawData(_ value: Data) {
-		data.append(value)
+		buffer.append(value)
 	}
 
 	func writeInt(_ value: Int32) {
@@ -51,35 +55,66 @@ class AvroWriter {
 	func writeFloat(_ value: Float) {
 		var le = value.bitPattern.littleEndian // UInt32
 		withUnsafeBytes(of: &le) { bytes in
-			data.append(contentsOf: bytes)
+			buffer.append(contentsOf: bytes)
 		}
 	}
 
 	func writeDouble(_ value: Double) {
 		var le = value.bitPattern.littleEndian // UInt64
 		withUnsafeBytes(of: &le) { bytes in
-			data.append(contentsOf: bytes)
+			buffer.append(contentsOf: bytes)
 		}
 	}
 
 	func writeBytes(_ value: Data) {
 		writeLong(Int64(value.count))
-		data.append(value)
+		buffer.append(value)
 	}
 
 	func writeString(_ value: String) {
 		let utf8Bytes = value.data(using: .utf8)!
 		writeLong(Int64(utf8Bytes.count))
-		data.append(utf8Bytes)
+		buffer.append(utf8Bytes)
 	}
 
 	@inline(__always)
 	private func writeVarUInt(_ value: UInt64) {
+		if #available(iOS 26.0, macOS 26.0, watchOS 26, tvOS 26, *) {
+			writeVarUInt_inlineArray(value)
+		} else {
+			writeVarUInt_fallback(value)
+		}
+	}
+
+	@inline(__always)
+	private func writeVarUInt_fallback(_ value: UInt64) {
 		var v = value
 		while (v & ~0x7F) != 0 {
-			data.append(UInt8((v & 0x7F) | 0x80))
+			buffer.append(UInt8((v & 0x7F) | 0x80))
 			v >>= 7
 		}
-		data.append(UInt8(v & 0x7F))
+		buffer.append(UInt8(v & 0x7F))
 	}
+
+	@available(iOS 26.0, macOS 26.0, watchOS 26, tvOS 26, *)
+	@inline(__always)
+	private func writeVarUInt_inlineArray(_ value: UInt64) {
+		var tmp: InlineArray<10, UInt8> = .init(repeating: 0)
+		var count = 0
+		var v = value
+
+		while (v & ~0x7F) != 0 {
+			tmp[count] = UInt8((v & 0x7F) | 0x80)
+			count += 1
+			v >>= 7
+		}
+		tmp[count] = UInt8(v & 0x7F)
+		count += 1
+
+		let s = tmp.span
+		for i in 0 ..< count {
+			buffer.append(s[i])
+		}
+	}
+
 }

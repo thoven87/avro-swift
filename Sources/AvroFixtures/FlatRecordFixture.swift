@@ -9,7 +9,7 @@ import Avro
 import Foundation
 
 public enum FlatRecordFixture {
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 
 		let id: Int64

@@ -10,7 +10,7 @@ import Foundation
 
 public enum LogicalDecimalFixture {
 
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let name: String
 		@LogicalType(.decimal(scale: 2, precision: 9))

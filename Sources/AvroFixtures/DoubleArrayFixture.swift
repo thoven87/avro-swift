@@ -9,7 +9,7 @@ import Avro
 import Foundation
 
 public enum DoubleArrayFixture {
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let strings: [String]
 		let ints: [Int]

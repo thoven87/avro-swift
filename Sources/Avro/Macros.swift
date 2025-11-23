@@ -1,5 +1,5 @@
 @attached(member, names: arbitrary)
-public macro Schema() = #externalMacro(module: "AvroMacros", type: "GenerateAvroSchema")
+public macro AvroSchema() = #externalMacro(module: "AvroMacros", type: "GenerateAvroSchema")
 
 @attached(member, names: arbitrary)
 public macro AvroEnum(namespace: String? = nil, doc: String? = nil) =

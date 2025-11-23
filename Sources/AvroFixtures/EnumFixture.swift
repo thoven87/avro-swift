@@ -25,7 +25,7 @@ public enum EnumFixture {
 		case TERMINATED
 	}
 
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let id: Int
 		let name: String

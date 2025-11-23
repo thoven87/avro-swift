@@ -9,7 +9,7 @@ import Avro
 import Foundation
 
 public enum FlatRecord2Fixture {
-	@Schema
+	@AvroSchema
 	public struct Def: Codable, Equatable, Sendable {
 		let street: String
 		let city: String
