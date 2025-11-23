@@ -9,7 +9,7 @@ import Foundation
 
 final class AvroUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 	var codingPath: [CodingKey]
-	var itemSchema: AvroSchema
+	var itemSchema: AvroSchemaDefinition
 	var reader: AvroReader
 	var count: Int?
 	private var _isAtEnd: Bool = false
@@ -28,7 +28,7 @@ final class AvroUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 	var isBytes: Bool
 	var bytesData: Data?
 
-	init(reader: AvroReader, schema: AvroSchema, codingPath: [CodingKey], isBytes: Bool = false) {
+	init(reader: AvroReader, schema: AvroSchemaDefinition, codingPath: [CodingKey], isBytes: Bool = false) {
 		self.reader = reader
 		self.itemSchema = schema
 		self.codingPath = codingPath

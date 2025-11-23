@@ -8,13 +8,13 @@
 final class AvroUnkeyedEncodingContainer: UnkeyedEncodingContainer {
 	var codingPath: [CodingKey]
 	var count: Int = 0
-	var itemSchema: AvroSchema
+	var itemSchema: AvroSchemaDefinition
 	var writer: AvroWriter
 	var tempWriter = AvroWriter()
 	private var finalized = false
 	var isBytes: Bool
 
-	init(codingPath: [CodingKey], itemSchema: AvroSchema, writer: AvroWriter, isBytes: Bool = false) {
+	init(codingPath: [CodingKey], itemSchema: AvroSchemaDefinition, writer: AvroWriter, isBytes: Bool = false) {
 		self.codingPath = codingPath
 		self.itemSchema = itemSchema
 		self.writer = writer

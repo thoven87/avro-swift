@@ -17,7 +17,7 @@ public enum LogicalTimestampMicrosFixture {
 		let timestamp: Date
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "TimestampMicrosRecord",
 		fields: [
 			.init(name: "name", type: .string),

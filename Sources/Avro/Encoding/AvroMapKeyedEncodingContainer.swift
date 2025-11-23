@@ -9,11 +9,11 @@ final class AvroMapKeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContaine
 	var codingPath: [CodingKey]
 	var writer: AvroWriter
 	var count: Int = 0
-	var itemSchema: AvroSchema
+	var itemSchema: AvroSchemaDefinition
 	var tempWriter = AvroWriter()
 	private var finalized = false
 
-	init(field: AvroSchema, writer: inout AvroWriter, codingPath: [CodingKey]) {
+	init(field: AvroSchemaDefinition, writer: inout AvroWriter, codingPath: [CodingKey]) {
 		self.writer = writer
 		self.codingPath = codingPath
 		self.itemSchema = field

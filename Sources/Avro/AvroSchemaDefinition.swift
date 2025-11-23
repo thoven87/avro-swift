@@ -5,8 +5,10 @@
 //  Created by Felix Ruppert on 09.11.25.
 //
 
+import Foundation
+
 /// An Avro Schema.
-indirect public enum AvroSchema: Equatable, Sendable {
+indirect public enum AvroSchemaDefinition: Equatable, Sendable {
 	case null, boolean, int, long, float, double, bytes, string
 	// case fixed(name: String, size: Int)
 	case `enum`(
@@ -17,11 +19,11 @@ indirect public enum AvroSchema: Equatable, Sendable {
 		symbols: [String],
 		default: String? = nil
 	)
-	case array(items: AvroSchema)
-	case map(values: AvroSchema)
+	case array(items: AvroSchemaDefinition)
+	case map(values: AvroSchemaDefinition)
 	case record(name: String, namespace: String? = nil, doc: String? = nil, aliases: [String]? = nil, fields: [Field])
-	// case union([AvroSchema])
-	case logical(type: LogicalType, underlying: AvroSchema)
+	case union([AvroSchemaDefinition])
+	case logical(type: LogicalType, underlying: AvroSchemaDefinition)
 	//
 	/// A field of an Avro schema.
 	public struct Field: Equatable, Sendable {
@@ -30,7 +32,7 @@ indirect public enum AvroSchema: Equatable, Sendable {
 		/// The doc of the field.
 		public let doc: String? = nil
 		/// The datatype.
-		public let type: AvroSchema
+		public let type: AvroSchemaDefinition
 		/// The order of the field.
 		public let order: Order = .ignore
 		/// Aliases of the field.
@@ -42,7 +44,7 @@ indirect public enum AvroSchema: Equatable, Sendable {
 		///   - type: The type of the field.
 		@inlinable
 		@inline(__always)
-		public init(name: String, type: AvroSchema) {
+		public init(name: String, type: AvroSchemaDefinition) {
 			self.name = name
 			self.type = type
 

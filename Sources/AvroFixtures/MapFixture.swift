@@ -14,7 +14,7 @@ public enum MapFixture {
 		let stringToInt: [String: Int]
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "MapRecord",
 		namespace: "test",
 		doc: "A record with a map field",

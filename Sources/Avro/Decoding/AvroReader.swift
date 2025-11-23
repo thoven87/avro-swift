@@ -15,6 +15,10 @@ final class AvroReader {
 		offset
 	}
 
+	func seek(to position: Int) {
+		offset = position
+	}
+
 	init(data: Data) {
 		self.data = data
 	}
@@ -131,7 +135,7 @@ final class AvroReader {
 		return str
 	}
 
-	func skip(schema: AvroSchema) throws {
+	func skip(schema: AvroSchemaDefinition) throws {
 		switch schema {
 			case .null:
 				break
@@ -205,6 +209,8 @@ final class AvroReader {
 				try skip(schema: underlying)
 			case .enum:
 				_ = try readInt()
+			case .union(let schemas):
+				fatalError()
 		}
 	}
 }

@@ -17,7 +17,7 @@ public enum LogicalDateFixture {
 		let dateOfBirth: Date
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "Person",
 		fields: [
 			.init(name: "name", type: .string),

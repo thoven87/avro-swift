@@ -17,7 +17,7 @@ struct PrimitiveDecodingTestss {
 	@Test("String schema decoding")
 	func stringSchemaDecoding() throws {
 		let data = Data([6, 0x66, 0x6f, 0x6f])
-		let schema: AvroSchema = .string
+		let schema: AvroSchemaDefinition = .string
 		let decodedAvro = try AvroDecoder(schema: schema).decode(String.self, from: data)
 		#expect(decodedAvro == "foo")
 	}
@@ -177,5 +177,21 @@ struct RecordDecodingTests {
 		let schema = EnumFixture.Def.avroSchema
 		let decodedAvro = try AvroDecoder(schema: schema).decode(EnumFixture.Def.self, from: data)
 		#expect(decodedAvro == value)
+	}
+
+	@Test("Nullable Union Record - decode with optional values")
+	func nullableUnionDecode() throws {
+		let data = NullableUnionFixture.serialized
+		let decoded = try AvroDecoder(schema: NullableUnionFixture.Def.avroSchema)
+			.decode(NullableUnionFixture.Def.self, from: data)
+		#expect(decoded == NullableUnionFixture.instance)
+	}
+
+	@Test("Multi-Type Union Record - decode with union type", .disabled("Unions not implemented"))
+	func multiTypeUnionDecode() throws {
+		let data = MultiTypeUnionFixture.serialized
+		let decoded = try AvroDecoder(schema: MultiTypeUnionFixture.Def.avroSchema)
+			.decode(MultiTypeUnionFixture.Def.self, from: data)
+		#expect(decoded == MultiTypeUnionFixture.instance)
 	}
 }

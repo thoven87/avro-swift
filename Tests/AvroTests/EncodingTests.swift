@@ -16,7 +16,7 @@ struct PrimitiveEncodingTests {
 
 	@Test("String schema encoding")
 	func stringSchemaEncoding() throws {
-		let schema: AvroSchema = .string
+		let schema: AvroSchemaDefinition = .string
 		let value = "foo"
 		let avroData = try AvroEncoder(schema: schema).encode(value)
 		#expect(avroData == Data([6, 0x66, 0x6f, 0x6f]))
@@ -146,6 +146,22 @@ struct RecordEncodingTests {
 		let value = EnumFixture.instance
 		let avroData = try AvroEncoder(schema: EnumFixture.Def.avroSchema).encode(value)
 		let expected = EnumFixture.serialized
+		#expect(avroData == expected)
+	}
+
+	@Test("Nullable Union Record - encode with optional values")
+	func nullableUnionEncode() throws {
+		let value = NullableUnionFixture.instance
+		let avroData = try AvroEncoder(schema: NullableUnionFixture.Def.avroSchema).encode(value)
+		let expected = NullableUnionFixture.serialized
+		#expect(avroData == expected)
+	}
+
+	@Test("Multi-Type Union Record - encode with union type")
+	func multiTypeUnionEncode() throws {
+		let value = MultiTypeUnionFixture.instance
+		let avroData = try AvroEncoder(schema: MultiTypeUnionFixture.Def.avroSchema).encode(value)
+		let expected = MultiTypeUnionFixture.serialized
 		#expect(avroData == expected)
 	}
 }

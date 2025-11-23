@@ -8,11 +8,11 @@
 import Foundation
 
 struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
-	var schema: AvroSchema
+	var schema: AvroSchemaDefinition
 	var reader: AvroReader
 	var codingPath: [any CodingKey]
 
-	init(schema: AvroSchema, reader: inout AvroReader, codingPath: [any CodingKey]) {
+	init(schema: AvroSchemaDefinition, reader: inout AvroReader, codingPath: [any CodingKey]) {
 		self.schema = schema
 		self.reader = reader
 		self.codingPath = codingPath
@@ -50,7 +50,7 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 	func decode<T>(_ type: T.Type) throws -> T where T: Decodable {
 		switch schema {
 			case .null:
-				return decodeNil() as! T
+				return Optional<Any>.none as! T
 			case .boolean:
 				return try reader.readBoolean() as! T
 			case .int:
@@ -73,6 +73,8 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 				return try decodeLogical(as: logicalType)
 			case .enum(_, _, _, _, let symbols, _):
 				return symbols[Int(try reader.readInt())] as! T
+			case .union(let possibleSchemas):
+				return try decodeUnion(possibleSchemas)
 			default:
 				throw DecodingError.typeMismatch(
 					T.self,
@@ -81,7 +83,15 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 		}
 	}
 
-	private func decodeLogical<T>(as lt: AvroSchema.LogicalType) throws -> T {
+	private func decodeUnion<T>(_ possibleSchemas: [AvroSchemaDefinition]) throws -> T where T: Decodable {
+		let index = Int(try reader.readLong())
+		let schema = possibleSchemas[Int(index)]
+
+		let box = _AvroDecodingBox(schema: schema, reader: reader, codingPath: codingPath)
+		return try T(from: box)
+	}
+
+	private func decodeLogical<T>(as lt: AvroSchemaDefinition.LogicalType) throws -> T {
 		let referenceOffset: Double = -978307200.0
 
 		switch lt {

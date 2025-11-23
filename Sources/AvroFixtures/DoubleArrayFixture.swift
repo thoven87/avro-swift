@@ -15,7 +15,7 @@ public enum DoubleArrayFixture {
 		let ints: [Int]
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "DoubleArrayRecord",
 		doc: "A record with two fields, both of which are arrays",
 		fields: [

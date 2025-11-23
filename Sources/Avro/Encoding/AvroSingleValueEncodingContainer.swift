@@ -8,11 +8,11 @@
 import Foundation
 
 struct AvroSingleValueEncodingContainer: SingleValueEncodingContainer {
-	var schema: AvroSchema
+	var schema: AvroSchemaDefinition
 	var writer: AvroWriter
 	var codingPath: [any CodingKey]
 
-	init(schema: AvroSchema, writer: inout AvroWriter, codingPath: [any CodingKey]) {
+	init(schema: AvroSchemaDefinition, writer: inout AvroWriter, codingPath: [any CodingKey]) {
 		self.schema = schema
 		self.writer = writer
 		self.codingPath = codingPath
@@ -55,13 +55,112 @@ struct AvroSingleValueEncodingContainer: SingleValueEncodingContainer {
 					)
 				}
 				writer.writeInt(Int32(i))
-
+			case .union(let unionSchema):
+				try encodeUnion(value, schemas: unionSchema)
 			default:
 				fatalError("Unsupported schema for single value encoding: \(schema)")
 		}
 	}
 
-	private func encodeLogical<T: Encodable>(_ v: T, as lt: AvroSchema.LogicalType) throws {
+	private mutating func encodeUnion<T: Encodable>(_ value: T, schemas: [AvroSchemaDefinition]) throws {
+		guard let (index, matchedSchema) = try resolveUnionSchema(for: value, with: schemas) else {
+			throw EncodingError.invalidValue(
+				value,
+				EncodingError.Context(
+					codingPath: codingPath,
+					debugDescription: "Value type does not match any schema in union: \(schemas)"
+				)
+			)
+		}
+
+		writer.writeInt(Int32(index))
+
+		let box = _AvroEncodingBox(schema: matchedSchema, codingPath: codingPath, userInfo: [:], writer: &writer)
+		try value.encode(to: box)
+	}
+
+	private func resolveUnionSchema<T: Encodable>(
+		for value: T,
+		with possibleSchemas: [AvroSchemaDefinition]
+	) throws -> (index: Int, schema: AvroSchemaDefinition)? {
+		for (index, schema) in possibleSchemas.enumerated() where try canEncode(value, withSchema: schema) {
+			return (index, schema)
+		}
+		return nil
+	}
+
+	private func canEncode<T: Encodable>(_ value: T, withSchema schema: AvroSchemaDefinition) throws -> Bool {
+		switch schema {
+			case .null:
+				return false
+			case .boolean:
+				return value is Bool
+
+			case .int:
+				return value is Int || value is Int32
+
+			case .long:
+				return value is Int64
+
+			case .float:
+				return value is Float
+
+			case .double:
+				return value is Double
+
+			case .bytes:
+				return value is Data || value is [UInt8]
+
+			case .string:
+				return value is String
+
+			case .array:
+				let mirror = Mirror(reflecting: value)
+				return mirror.displayStyle == .collection
+
+			case .map:
+				let mirror = Mirror(reflecting: value)
+				return mirror.displayStyle == .dictionary
+
+			case .record(let name, _, _, _, _):
+				let typeName = String(describing: type(of: value))
+				return typeName.contains(name)
+
+			case .enum(_, _, _, _, let symbols, _):
+				guard let stringValue = value as? String else { return false }
+				return symbols.contains(stringValue)
+
+			case .logical(let logicalType, _):
+				return canEncodeLogical(value, as: logicalType)
+
+			case .union:
+				return false
+		}
+	}
+
+	private func canEncodeLogical<T: Encodable>(_ value: T, as logicalType: AvroSchemaDefinition.LogicalType) -> Bool {
+		switch logicalType {
+			case .date:
+				return value is Date || value is Double
+
+			case .timeMillis:
+				return value is Int || value is Int32
+
+			case .timeMicros:
+				return value is Int || value is Int64
+
+			case .timestampMillis, .timestampMicros:
+				return value is Date || value is Int64
+
+			case .uuid:
+				return value is UUID || value is String
+
+			case .decimal:
+				return value is Decimal
+		}
+	}
+
+	private func encodeLogical<T: Encodable>(_ v: T, as lt: AvroSchemaDefinition.LogicalType) throws {
 
 		switch lt {
 			case .date:
@@ -140,7 +239,19 @@ struct AvroSingleValueEncodingContainer: SingleValueEncodingContainer {
 	}
 
 	mutating func encodeNil() throws {
-		return
+		switch schema {
+			case .union(let unionSchema):
+				guard let nullIndex = unionSchema.firstIndex(of: .null) else {
+					throw EncodingError.invalidValue(
+						nil as Int64? as Any,
+						EncodingError.Context(codingPath: codingPath, debugDescription: "Null value not found in type union")
+					)
+				}
+				writer.writeLong(Int64(nullIndex))
+			default:
+				return
+
+		}
 	}
 
 }

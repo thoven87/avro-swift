@@ -17,7 +17,7 @@ public enum FlatRecordFixture {
 		let email: String
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "User",
 		fields: [
 			.init(name: "id", type: .long),

@@ -77,7 +77,7 @@ public struct GenerateAvroEnum: MemberMacro {
 		let docParam = doc.map { ", doc: \"\($0)\"" } ?? ""
 
 		let memberSource = """
-			public static var avroSchema: AvroSchema {
+			public static var avroSchema: AvroSchemaDefinition {
 				.enum(name: "\(enumName)"\(namespaceParam)\(docParam), symbols: [\(symbolsArray)])
 			}
 			"""

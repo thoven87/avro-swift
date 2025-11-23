@@ -5,5 +5,9 @@ public macro AvroSchema() = #externalMacro(module: "AvroMacros", type: "Generate
 public macro AvroEnum(namespace: String? = nil, doc: String? = nil) =
 	#externalMacro(module: "AvroMacros", type: "GenerateAvroEnum")
 
+@attached(member, names: arbitrary)
+public macro AvroUnion() = #externalMacro(module: "AvroMacros", type: "GenerateAvroUnion")
+
 @attached(peer)
-public macro LogicalType(_ name: AvroSchema.LogicalType) = #externalMacro(module: "AvroMacros", type: "LogicalTypeAttribute")
+public macro LogicalType(_ name: AvroSchemaDefinition.LogicalType) =
+	#externalMacro(module: "AvroMacros", type: "LogicalTypeAttribute")

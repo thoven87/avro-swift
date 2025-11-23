@@ -7,7 +7,7 @@
 
 class AvroMapKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProtocol {
 	var codingPath: [CodingKey]
-	var itemSchema: AvroSchema
+	var itemSchema: AvroSchemaDefinition
 	var reader: AvroReader
 	var count: Int?
 	var isAtEnd: Bool = false
@@ -103,7 +103,7 @@ class AvroMapKeyedDecodingContainer<Key: CodingKey>: KeyedDecodingContainerProto
 		return value
 	}
 
-	init(reader: AvroReader, schema: AvroSchema, codingPath: [CodingKey]) {
+	init(reader: AvroReader, schema: AvroSchemaDefinition, codingPath: [CodingKey]) {
 		self.reader = reader
 		self.itemSchema = schema
 		self.codingPath = codingPath

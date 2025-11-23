@@ -17,7 +17,7 @@ public enum LogicalTimeMicrosFixture {
 		let timeOfDay: Int64
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "TimeOfDayMicros",
 		fields: [
 			.init(name: "name", type: .string),

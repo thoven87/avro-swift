@@ -17,7 +17,7 @@ public enum LogicalDecimalFixture {
 		let amount: Decimal
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "DecimalRecord",
 		fields: [
 			.init(name: "name", type: .string),

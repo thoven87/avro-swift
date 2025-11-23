@@ -9,11 +9,11 @@ import Foundation
 
 /// An encoder to encode a ``Schema()`` object into `Data`.
 public final class AvroEncoder {
-	var schema: AvroSchema
+	var schema: AvroSchemaDefinition
 
 	/// Initialize a new encoder.
 	/// - Parameter schema: The schema to use for encoding.
-	public init(schema: AvroSchema) {
+	public init(schema: AvroSchemaDefinition) {
 		self.schema = schema
 	}
 
@@ -33,9 +33,10 @@ final class _AvroEncodingBox: Encoder {
 	var codingPath: [any CodingKey]
 	var userInfo: [CodingUserInfoKey: Any] = [:]
 	var writer: AvroWriter
-	var schema: AvroSchema
+	var schema: AvroSchemaDefinition
 
-	init(schema: AvroSchema, codingPath: [any CodingKey], userInfo: [CodingUserInfoKey: Any], writer: inout AvroWriter) {
+	init(schema: AvroSchemaDefinition, codingPath: [any CodingKey], userInfo: [CodingUserInfoKey: Any], writer: inout AvroWriter)
+	{
 		self.codingPath = codingPath
 		self.userInfo = userInfo
 		self.writer = writer
@@ -43,7 +44,6 @@ final class _AvroEncodingBox: Encoder {
 	}
 
 	func container<Key>(keyedBy type: Key.Type) -> KeyedEncodingContainer<Key> where Key: CodingKey {
-
 		switch schema {
 			case .record(_, _, _, _, let fields):
 				let container = AvroRecordKeyedEncodingContainer<Key>(fields: fields, writer: &writer, codingPath: codingPath)

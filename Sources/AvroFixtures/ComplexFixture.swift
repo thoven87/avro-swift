@@ -43,71 +43,73 @@ public enum ComplexFixture {
 		let mixedArray: [MixedItem]
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "Def",
 		namespace: nil,
 		fields: [
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "eventId",
-				type: Avro.AvroSchema.string
+				type: Avro.AvroSchemaDefinition.string
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "timestamp",
-				type: Avro.AvroSchema.long
+				type: Avro.AvroSchemaDefinition.long
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "metadata",
-				type: Avro.AvroSchema.map(values: Avro.AvroSchema.string)
+				type: Avro.AvroSchemaDefinition.map(values: Avro.AvroSchemaDefinition.string)
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "tags",
-				type: Avro.AvroSchema.array(items: Avro.AvroSchema.string)
+				type: Avro.AvroSchemaDefinition.array(items: Avro.AvroSchemaDefinition.string)
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "metrics",
-				type: Avro.AvroSchema.map(values: Avro.AvroSchema.double)
+				type: Avro.AvroSchemaDefinition.map(values: Avro.AvroSchemaDefinition.double)
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "nestedData",
-				type: Avro.AvroSchema.record(
+				type: Avro.AvroSchemaDefinition.record(
 					name: "NestedRecord",
 					namespace: nil,
 					fields: [
-						Avro.AvroSchema.Field(
+						Avro.AvroSchemaDefinition.Field(
 							name: "userId",
-							type: Avro.AvroSchema.long
+							type: Avro.AvroSchemaDefinition.long
 						),
-						Avro.AvroSchema.Field(
+						Avro.AvroSchemaDefinition.Field(
 							name: "properties",
-							type: Avro.AvroSchema.map(values: Avro.AvroSchema.array(items: Avro.AvroSchema.string))
+							type: Avro.AvroSchemaDefinition.map(
+								values: Avro.AvroSchemaDefinition.array(items: Avro.AvroSchemaDefinition.string)
+							)
 						),
-						Avro.AvroSchema.Field(
+						Avro.AvroSchemaDefinition.Field(
 							name: "scores",
-							type: Avro.AvroSchema.array(items: Avro.AvroSchema.float)
+							type: Avro.AvroSchemaDefinition.array(items: Avro.AvroSchemaDefinition.float)
 						)
 					]
 				)
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "arrayOfMaps",
-				type: Avro.AvroSchema.array(items: Avro.AvroSchema.map(values: Avro.AvroSchema.int))
+				type: Avro.AvroSchemaDefinition.array(items: Avro.AvroSchemaDefinition.map(values: Avro.AvroSchemaDefinition.int))
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "deeplyNested",
-				type: Avro.AvroSchema.map(
-					values: Avro.AvroSchema.map(
-						values: Avro.AvroSchema.array(
-							items: Avro.AvroSchema.record(
+				type: Avro.AvroSchemaDefinition.map(
+					values: Avro.AvroSchemaDefinition.map(
+						values: Avro.AvroSchemaDefinition.array(
+							items: Avro.AvroSchemaDefinition.record(
 								name: "DeepRecord",
 								namespace: nil,
 								fields: [
-									Avro.AvroSchema.Field(
+									Avro.AvroSchemaDefinition.Field(
 										name: "id",
-										type: Avro.AvroSchema.int
+										type: Avro.AvroSchemaDefinition.int
 									),
-									Avro.AvroSchema.Field(
+									Avro.AvroSchemaDefinition.Field(
 										name: "data",
-										type: Avro.AvroSchema.bytes
+										type: Avro.AvroSchemaDefinition.bytes
 									)
 								]
 							)
@@ -115,24 +117,26 @@ public enum ComplexFixture {
 					)
 				)
 			),
-			Avro.AvroSchema.Field(
+			Avro.AvroSchemaDefinition.Field(
 				name: "mixedArray",
-				type: Avro.AvroSchema.array(
-					items: Avro.AvroSchema.record(
+				type: Avro.AvroSchemaDefinition.array(
+					items: Avro.AvroSchemaDefinition.record(
 						name: "MixedItem",
 						namespace: nil,
 						fields: [
-							Avro.AvroSchema.Field(
+							Avro.AvroSchemaDefinition.Field(
 								name: "itemId",
-								type: Avro.AvroSchema.string
+								type: Avro.AvroSchemaDefinition.string
 							),
-							Avro.AvroSchema.Field(
+							Avro.AvroSchemaDefinition.Field(
 								name: "values",
-								type: Avro.AvroSchema.map(values: Avro.AvroSchema.double)
+								type: Avro.AvroSchemaDefinition.map(values: Avro.AvroSchemaDefinition.double)
 							),
-							Avro.AvroSchema.Field(
+							Avro.AvroSchemaDefinition.Field(
 								name: "nested",
-								type: Avro.AvroSchema.array(items: Avro.AvroSchema.map(values: Avro.AvroSchema.boolean))
+								type: Avro.AvroSchemaDefinition.array(
+									items: Avro.AvroSchemaDefinition.map(values: Avro.AvroSchemaDefinition.boolean)
+								)
 							)
 						]
 					)

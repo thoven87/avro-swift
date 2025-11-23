@@ -61,41 +61,97 @@ public struct GenerateAvroSchema: MemberMacro {
 
 		let fieldsJoined = fieldEntries.joined(separator: ",\n\t\t\t")
 
-		let memberSource = """
-			public static var avroSchema: AvroSchema {
+		// Generate encode(to:) method that handles optionals properly
+		var encodeStatements: [String] = []
+		for member in structDecl.memberBlock.members {
+			guard let varDecl = member.decl.as(VariableDeclSyntax.self) else { continue }
+			for binding in varDecl.bindings {
+				guard let pattern = binding.pattern.as(IdentifierPatternSyntax.self) else { continue }
+				let propName = pattern.identifier.text
+				guard let typeSyntax = binding.typeAnnotation?.type else { continue }
+				let rawType = typeSyntax.description.trimmingCharacters(in: .whitespacesAndNewlines)
+
+				// Check if this is an optional type
+				if rawType.hasSuffix("?") {
+					// For optional fields, we need to explicitly encode nil
+					encodeStatements.append(
+						"""
+							if let value = self.\(propName) {
+								try container.encode(value, forKey: .\(propName))
+							} else {
+								try container.encodeNil(forKey: .\(propName))
+							}
+						"""
+					)
+				} else {
+					// For non-optional fields, use normal encoding
+					encodeStatements.append("try container.encode(self.\(propName), forKey: .\(propName))")
+				}
+			}
+		}
+
+		let encodeBody = encodeStatements.joined(separator: "\n\t\t")
+
+		let schemaSource = """
+			public static var avroSchema: AvroSchemaDefinition {
 				.record(name: "\(structName)", fields: [
 					\(fieldsJoined)
 				])
 			}
 			"""
 
-		return [DeclSyntax(stringLiteral: memberSource)]
+		let encodeSource = """
+			public func encode(to encoder: Encoder) throws {
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				\(encodeBody)
+			}
+			"""
+
+		return [
+			DeclSyntax(stringLiteral: schemaSource),
+			DeclSyntax(stringLiteral: encodeSource)
+		]
 	}
 
 	private static func mapToAvroType(rawType: String) -> String {
+		// Check if the type is optional (ends with ?)
+		let isOptional = rawType.hasSuffix("?")
 		let type = rawType.replacingOccurrences(of: "?", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
 
+		let baseSchema: String
 		switch type {
 			case "Int", "Int32":
-				return ".int"
+				baseSchema = ".int"
 			case "Int64":
-				return ".long"
+				baseSchema = ".long"
 			case "Float":
-				return ".float"
+				baseSchema = ".float"
 			case "Double":
-				return ".double"
+				baseSchema = ".double"
 			case "Bool":
-				return ".boolean"
+				baseSchema = ".boolean"
 			case "String":
-				return ".string"
+				baseSchema = ".string"
 			case "Data", "[UInt8]":
-				return ".bytes"
+				baseSchema = ".bytes"
 			default:
 				guard let nested = resolveNested(type: type) else {
-					return "\(type).avroSchema"
+					baseSchema = "\(type).avroSchema"
+					// For optional custom types, we need to wrap in union
+					if isOptional {
+						return ".union([.null, \(baseSchema)])"
+					}
+					return baseSchema
 				}
-				return nested
+				baseSchema = nested
 		}
+
+		// If the original type was optional, wrap it in a union with null
+		if isOptional {
+			return ".union([.null, \(baseSchema)])"
+		}
+
+		return baseSchema
 	}
 
 	private static func resolveNested(type: String) -> String? {
@@ -167,7 +223,7 @@ public struct GenerateAvroSchema: MemberMacro {
 	}
 
 	private static func underlyingForLogicalExpr(_ logicalExpr: String) -> String {
-		let base = logicalExpr.replacingOccurrences(of: "AvroSchema.LogicalType.", with: "")
+		let base = logicalExpr.replacingOccurrences(of: "AvroSchemaDefinition.LogicalType.", with: "")
 			.replacingOccurrences(of: ".LogicalType.", with: "")
 			.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -206,7 +262,7 @@ public struct GenerateAvroSchema: MemberMacro {
 	private static func allowedSwiftTypes(forLogicalExpr logicalExpr: String) -> Set<String>? {
 		let base =
 			logicalExpr
-			.replacingOccurrences(of: "AvroSchema.LogicalType.", with: "")
+			.replacingOccurrences(of: "AvroSchemaDefinition.LogicalType.", with: "")
 			.replacingOccurrences(of: ".LogicalType.", with: "")
 			.trimmingCharacters(in: .whitespacesAndNewlines)
 

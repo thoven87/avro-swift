@@ -33,7 +33,7 @@ public enum EnumFixture {
 		let status: EmployeeStatus
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "Employee",
 		namespace: "com.example",
 		fields: [

@@ -14,7 +14,7 @@ public enum ArrayFixture {
 		let strings: [String]
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "ArrayRecord",
 		fields: [
 			.init(name: "strings", type: .array(items: .string))

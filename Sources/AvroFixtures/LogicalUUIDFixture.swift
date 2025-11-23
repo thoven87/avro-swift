@@ -17,7 +17,7 @@ public enum LogicalUUIDFixture {
 		let id: UUID
 	}
 
-	public static let schema: AvroSchema = .record(
+	public static let schema: AvroSchemaDefinition = .record(
 		name: "UUIDRecord",
 		fields: [
 			.init(name: "name", type: .string),

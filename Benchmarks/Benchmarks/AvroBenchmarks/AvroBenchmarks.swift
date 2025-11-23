@@ -10,7 +10,7 @@ let benchmarks: @Sendable () -> Void = {
 			metrics: [.wallClock])
 	) { benchmark in
 		let value = ComplexFixture.instance
-		let encoder = try AvroEncoder(schema: ComplexFixture.Def.avroSchema)
+		let encoder = AvroEncoder(schema: ComplexFixture.Def.avroSchema)
 		for _ in benchmark.scaledIterations {
 			_ = try encoder.encode(value)
 		}
@@ -22,7 +22,7 @@ let benchmarks: @Sendable () -> Void = {
 			metrics: [.wallClock])
 	) { benchmark in
 		let value = ComplexFixture.serialized
-		let decoder = try AvroDecoder(schema: ComplexFixture.Def.avroSchema)
+		let decoder = AvroDecoder(schema: ComplexFixture.Def.avroSchema)
 		for _ in benchmark.scaledIterations {
 			_ = try decoder.decode(ComplexFixture.Def.self, from: value)
 		}

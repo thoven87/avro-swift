@@ -9,11 +9,11 @@ import Foundation
 
 /// A decoder to decode a `Data` object into a struct or class annotated with ``Schema()``.
 public final class AvroDecoder {
-	let schema: AvroSchema
+	let schema: AvroSchemaDefinition
 
 	/// Initilaize a new Decoder.
 	/// - Parameter schema: The schema to initialize with.
-	public init(schema: AvroSchema) {
+	public init(schema: AvroSchemaDefinition) {
 		self.schema = schema
 	}
 
@@ -33,10 +33,10 @@ public final class AvroDecoder {
 final class _AvroDecodingBox: Decoder {
 	var codingPath: [CodingKey]
 	var userInfo: [CodingUserInfoKey: Any] = [:]
-	var schema: AvroSchema
+	var schema: AvroSchemaDefinition
 	var reader: AvroReader
 
-	init(schema: AvroSchema, reader: AvroReader, codingPath: [CodingKey]) {
+	init(schema: AvroSchemaDefinition, reader: AvroReader, codingPath: [CodingKey]) {
 		self.schema = schema
 		self.reader = reader
 		self.codingPath = codingPath
