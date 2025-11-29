@@ -7,60 +7,196 @@
 
 import Foundation
 
-final class AvroReader {
-	let data: Data
-	private var offset: Int = 0
+#if compiler(>=6.2)
+	// MARK: - Swift 6.2+ Optimized Implementation
+	final class AvroReader {
+		let data: Data
+		private var offset: Int = 0
 
-	var currentOffset: Int {
-		offset
-	}
+		var currentOffset: Int { offset }
 
-	func seek(to position: Int) {
-		offset = position
-	}
+		init(data: Data) {
+			self.data = data
+		}
 
-	init(data: Data) {
-		self.data = data
-	}
+		init(data: Data, offset: Int) {
+			self.data = data
+			self.offset = offset
+		}
 
-	init(data: Data, offset: Int) {
-		self.data = data
-		self.offset = offset
-	}
+		@inline(__always)
+		private func ensureAvailable(_ count: Int) throws {
+			guard count >= 0, offset + count <= data.count else {
+				throw AvroError.endOfData
+			}
+		}
 
-	@inline(__always)
-	private func ensureAvailable(_ count: Int) throws {
-		guard count >= 0, offset + count <= data.count else {
-			throw AvroError.endOfData
+		@inline(__always)
+		private func readByte() throws -> UInt8 {
+			try ensureAvailable(1)
+			let value = data.bytes.unsafeLoadUnaligned(fromByteOffset: offset, as: UInt8.self)
+			offset += 1
+			return value
+		}
+
+		@inline(__always)
+		private func loadInteger<T: FixedWidthInteger & BitwiseCopyable>(_ type: T.Type) throws -> T {
+			let size = MemoryLayout<T>.size
+			try ensureAvailable(size)
+			let raw = data.bytes.unsafeLoadUnaligned(fromByteOffset: offset, as: T.self)
+			offset &+= size
+			return T(littleEndian: raw)
+		}
+
+		@inline(__always)
+		private func readBytes(count: Int) throws -> Data {
+			try ensureAvailable(count)
+			let start = offset
+			let end = offset + count
+			offset = end
+			return Data(data[start ..< end])
+		}
+
+		func readFloat() throws -> Float {
+			Float(bitPattern: try loadInteger(UInt32.self))
+		}
+
+		func readDouble() throws -> Double {
+			Double(bitPattern: try loadInteger(UInt64.self))
+		}
+
+		func skip(schema: AvroSchemaDefinition) throws {
+			switch schema {
+				case .null:
+					break
+				case .boolean:
+					_ = try readByte()
+				case .int:
+					_ = try readInt()
+				case .long:
+					_ = try readLong()
+				case .float:
+					try ensureAvailable(4)
+					offset &+= 4
+				case .double:
+					try ensureAvailable(8)
+					offset &+= 8
+				case .bytes, .string:
+					let length = try readLong()
+					guard length >= 0 else { throw AvroError.negativeLength }
+					try ensureAvailable(Int(length))
+					offset &+= Int(length)
+				case .array(let items):
+					try skipBlocks { try skip(schema: items) }
+				case .map(let values):
+					try skipBlocks {
+						_ = try readString()
+						try skip(schema: values)
+					}
+				case .record(_, _, _, _, let fields):
+					for field in fields {
+						try skip(schema: field.type)
+					}
+				case .logical(_, let underlying):
+					try skip(schema: underlying)
+				case .enum:
+					_ = try readInt()
+				case .union:
+					// FIXME: Implement skipping of unions
+					fatalError()
+			}
 		}
 	}
+#else
+	// MARK: - Swift <6.2 Compatible Implementation
+	class AvroReader {
+		let data: Data
+		private var offset: Int = 0
 
-	@inline(__always)
-	private func readByte() throws -> UInt8 {
-		try ensureAvailable(1)
-		let value = data.bytes.unsafeLoadUnaligned(fromByteOffset: offset, as: UInt8.self)
-		offset += 1
-		return value
+		var currentOffset: Int { offset }
+
+		init(data: Data) {
+			self.data = data
+		}
+
+		init(data: Data, offset: Int) {
+			self.data = data
+			self.offset = offset
+		}
+
+		@inline(__always)
+		private func readByte() throws -> UInt8 {
+			guard offset < data.count else { throw AvroError.endOfData }
+			let byte = data[offset]
+			offset += 1
+			return byte
+		}
+
+		@inline(__always)
+		private func readBytes(count: Int) throws -> Data {
+			guard offset + count <= data.count else { throw AvroError.endOfData }
+			let slice = data[offset ..< offset + count]
+			offset += count
+			return Data(slice)
+		}
+
+		func readFloat() throws -> Float {
+			let bytes = try readBytes(count: 4)
+			return bytes.withUnsafeBytes { ptr in
+				Float(bitPattern: ptr.loadUnaligned(as: UInt32.self).littleEndian)
+			}
+		}
+
+		func readDouble() throws -> Double {
+			let bytes = try readBytes(count: 8)
+			return bytes.withUnsafeBytes { ptr in
+				Double(bitPattern: ptr.loadUnaligned(as: UInt64.self).littleEndian)
+			}
+		}
+
+		func skip(schema: AvroSchemaDefinition) throws {
+			switch schema {
+				case .null:
+					break
+				case .boolean:
+					_ = try readByte()
+				case .int:
+					_ = try readInt()
+				case .long:
+					_ = try readLong()
+				case .float:
+					_ = try readBytes(count: 4)
+				case .double:
+					_ = try readBytes(count: 8)
+				case .bytes, .string:
+					let length = try readLong()
+					guard length >= 0 else { throw AvroError.negativeLength }
+					_ = try readBytes(count: Int(length))
+				case .array(let items):
+					try skipBlocks { try skip(schema: items) }
+				case .map(let values):
+					try skipBlocks {
+						_ = try readString()
+						try skip(schema: values)
+					}
+				case .record(_, _, _, _, let fields):
+					for field in fields {
+						try skip(schema: field.type)
+					}
+				case .logical(_, let underlying):
+					try skip(schema: underlying)
+				case .enum:
+					_ = try readInt()
+				case .union:
+					// FIXME: Implement skipping of unions
+					fatalError()
+			}
+		}
 	}
+#endif
 
-	@inline(__always)
-	private func loadInteger<T: FixedWidthInteger & BitwiseCopyable>(_ type: T.Type) throws -> T {
-		let size = MemoryLayout<T>.size
-		try ensureAvailable(size)
-		let raw = data.bytes.unsafeLoadUnaligned(fromByteOffset: offset, as: T.self)
-		offset &+= size
-		return T(littleEndian: raw)
-	}
-
-	@inline(__always)
-	private func readBytes(count: Int) throws -> Data {
-		try ensureAvailable(count)
-		let start = offset
-		let end = offset + count
-		offset = end
-		return Data(data[start ..< end]) // Have to make new Data to reset the startIndex to 0
-	}
-
+// MARK: - Common Implementation
+extension AvroReader {
 	@inline(__always)
 	private func readVarUInt() throws -> UInt64 {
 		var shift: UInt64 = 0
@@ -94,31 +230,22 @@ final class AvroReader {
 		return shifted ^ -negMask
 	}
 
+	func seek(to position: Int) {
+		offset = position
+	}
+
 	func readBoolean() throws -> Bool {
-		let byte = try readByte()
-		return byte != 0
+		try readByte() != 0
 	}
 
 	func readInt() throws -> Int32 {
-		let u = try readVarUInt()
-		return zigZagDecodeInt(UInt32(u))
+		zigZagDecodeInt(UInt32(try readVarUInt()))
 	}
 
 	@inline(__always)
 	@inlinable
 	func readLong() throws -> Int64 {
-		let u = try readVarUInt()
-		return zigZagDecodeLong(u)
-	}
-
-	func readFloat() throws -> Float {
-		let bits: UInt32 = try loadInteger(UInt32.self)
-		return Float(bitPattern: bits)
-	}
-
-	func readDouble() throws -> Double {
-		let bits: UInt64 = try loadInteger(UInt64.self)
-		return Double(bitPattern: bits)
+		zigZagDecodeLong(try readVarUInt())
 	}
 
 	func readBytes() throws -> Data {
@@ -135,83 +262,22 @@ final class AvroReader {
 		return str
 	}
 
-	func skip(schema: AvroSchemaDefinition) throws {
-		switch schema {
-			case .null:
-				break
-			case .boolean:
-				_ = try readByte()
-			case .int:
-				_ = try readInt()
-			case .long:
+	private func skipBlocks(_ skipItem: () throws -> Void) throws {
+		var isAtEnd = false
+		while !isAtEnd {
+			let blockCount = try readLong()
+			if blockCount == 0 {
+				isAtEnd = true
+			} else if blockCount < 0 {
 				_ = try readLong()
-			case .float:
-				try ensureAvailable(4)
-				offset &+= 4
-			case .double:
-				try ensureAvailable(8)
-				offset &+= 8
-			case .bytes:
-				let length = try readLong()
-				guard length >= 0 else { throw AvroError.negativeLength }
-				try ensureAvailable(Int(length))
-				offset &+= Int(length)
-			case .string:
-				let length = try readLong()
-				guard length >= 0 else { throw AvroError.negativeLength }
-				try ensureAvailable(Int(length))
-				offset &+= Int(length)
-			case .array(let items):
-				var isAtEnd = false
-				while !isAtEnd {
-					let blockCount = try readLong()
-					if blockCount == 0 {
-						isAtEnd = true
-					} else if blockCount < 0 {
-						_ = try readLong()
-						let count = Int(-blockCount)
-						for _ in 0 ..< count {
-							try skip(schema: items)
-						}
-					} else {
-						let count = Int(blockCount)
-						for _ in 0 ..< count {
-							try skip(schema: items)
-						}
-					}
+				for _ in 0 ..< Int(-blockCount) {
+					try skipItem()
 				}
-			case .map(let values):
-				var isAtEnd = false
-				while !isAtEnd {
-					let blockCount = try readLong()
-					if blockCount == 0 {
-						isAtEnd = true
-					} else if blockCount < 0 {
-						_ = try readLong()
-						let count = Int(-blockCount)
-						for _ in 0 ..< count {
-							_ = try readString()
-							try skip(schema: values)
-						}
-					} else {
-						let count = Int(blockCount)
-						for _ in 0 ..< count {
-							_ = try readString()
-							try skip(schema: values)
-						}
-					}
+			} else {
+				for _ in 0 ..< Int(blockCount) {
+					try skipItem()
 				}
-			case .record(_, _, _, _, let fields):
-				for field in fields {
-					try skip(schema: field.type)
-				}
-			case .logical(_, let underlying):
-				try skip(schema: underlying)
-			case .enum:
-				_ = try readInt()
-			case .union:
-				// FIXME: Implement skipping of unions
-				fatalError()
+			}
 		}
 	}
 }

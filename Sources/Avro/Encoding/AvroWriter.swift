@@ -83,7 +83,7 @@ final class AvroWriter {
 			// Swift 6.2+ compilers
 
 			#if os(iOS) || os(macOS) || os(tvOS) || os(watchOS)
-				if #available(iOS 26.0, macOS 26.0, watchOS 26.0, tvOS 26.0, *) {
+				if #available(iOS 26.0, macOS 26.0, watchOS 26.0, tvOS 26.0, visionOS 1.0, *) {
 					writeVarUInt_inlineArray(value)
 				} else {
 					writeVarUInt_fallback(value)
