@@ -4,8 +4,9 @@ import Foundation
 
 let benchmarks: @Sendable () -> Void = {
 
+	// Complex record benchmark (nested structures, multiple types)
 	Benchmark(
-		"Encoding Speed",
+		"Complex Record - Encoding",
 		configuration: .init(
 			metrics: [.wallClock])
 	) { benchmark in
@@ -17,7 +18,7 @@ let benchmarks: @Sendable () -> Void = {
 	}
 
 	Benchmark(
-		"Decoding Speed",
+		"Complex Record - Decoding",
 		configuration: .init(
 			metrics: [.wallClock])
 	) { benchmark in
@@ -26,7 +27,5 @@ let benchmarks: @Sendable () -> Void = {
 		for _ in benchmark.scaledIterations {
 			_ = try decoder.decode(ComplexFixture.Def.self, from: value)
 		}
-
 	}
-
 }

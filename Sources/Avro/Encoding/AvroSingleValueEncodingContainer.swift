@@ -19,41 +19,49 @@ struct AvroSingleValueEncodingContainer: SingleValueEncodingContainer {
 	}
 
 	mutating func encode<T>(_ value: T) throws where T: Encodable {
+		func typeMismatch(_ expected: String) -> EncodingError {
+			EncodingError.invalidValue(
+				value,
+				EncodingError.Context(
+					codingPath: codingPath,
+					debugDescription: "Expected \(expected)"
+				)
+			)
+		}
 		switch schema {
 			case .null:
 				try encodeNil()
 			case .boolean:
-				writer.writeBoolean(value as! Bool)
+				guard let v = value as? Bool else { throw typeMismatch("Bool") }
+				writer.writeBoolean(v)
 			case .int:
 				if let v = value as? Int {
 					writer.writeInt(Int32(v))
 				} else if let v = value as? Int32 {
 					writer.writeInt(v)
 				} else {
-					throw EncodingError.invalidValue(
-						value,
-						EncodingError.Context(codingPath: codingPath, debugDescription: "Expected Int")
-					)
+					throw typeMismatch("Int or Int32")
 				}
 			case .long:
-				writer.writeLong(value as! Int64)
+				guard let v = value as? Int64 else { throw typeMismatch("Int64") }
+				writer.writeLong(v)
 			case .float:
-				writer.writeFloat(value as! Float)
+				guard let v = value as? Float else { throw typeMismatch("Float") }
+				writer.writeFloat(v)
 			case .double:
-				writer.writeDouble(value as! Double)
+				guard let v = value as? Double else { throw typeMismatch("Double") }
+				writer.writeDouble(v)
 			case .bytes:
-				writer.writeBytes(value as! Data)
+				guard let v = value as? Data else { throw typeMismatch("Data") }
+				writer.writeBytes(v)
 			case .string:
-				writer.writeString(value as! String)
+				guard let v = value as? String else { throw typeMismatch("String") }
+				writer.writeString(v)
 			case .logical(let logicalType, _):
 				try encodeLogical(value, as: logicalType)
 			case .enum(_, _, _, _, let symbols, _):
-				guard let i = symbols.firstIndex(of: value as! String) else {
-					throw EncodingError.invalidValue(
-						value,
-						EncodingError.Context(codingPath: codingPath, debugDescription: "Value not in enum")
-					)
-				}
+				guard let s = value as? String else { throw typeMismatch("String (enum symbol)") }
+				guard let i = symbols.firstIndex(of: s) else { throw typeMismatch("enum symbol") }
 				writer.writeInt(Int32(i))
 			case .union(let unionSchema):
 				try encodeUnion(value, schemas: unionSchema)

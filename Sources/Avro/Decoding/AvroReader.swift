@@ -209,7 +209,8 @@ final class AvroReader {
 				try skip(schema: underlying)
 			case .enum:
 				_ = try readInt()
-			case .union(let schemas):
+			case .union:
+				// FIXME: Implement skipping of unions
 				fatalError()
 		}
 	}

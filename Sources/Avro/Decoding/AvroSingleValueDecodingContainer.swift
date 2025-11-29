@@ -95,7 +95,6 @@ struct AvroSingleValueDecodingContainer: SingleValueDecodingContainer {
 		let referenceOffset: Double = -978307200.0
 
 		switch lt {
-
 			case .date:
 				return try Double(reader.readInt()) * 86400 + referenceOffset as! T
 			case .timeMillis:

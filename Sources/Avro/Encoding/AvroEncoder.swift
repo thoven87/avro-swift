@@ -50,7 +50,14 @@ final class _AvroEncodingBox: Encoder {
 				return .init(container)
 			case .map(let valueSchema):
 				let real = AvroMapKeyedEncodingContainer<Key>(field: valueSchema, writer: &writer, codingPath: codingPath)
-				return .init(FinalizingKeyedContainer(base: real))
+				return .init(FinalizingMapKeyedContainer(base: real))
+			case .union(let unionSchemas):
+				let container = AvroUnionKeyedEncodingContainer<Key>(
+					unionSchema: unionSchemas,
+					writer: &writer,
+					codingPath: codingPath
+				)
+				return .init(container)
 			default:
 				fatalError("Keyed container only for records and maps")
 		}
@@ -75,7 +82,7 @@ final class _AvroEncodingBox: Encoder {
 
 	}
 
-	private final class FinalizingKeyedContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
+	private final class FinalizingMapKeyedContainer<Key: CodingKey>: KeyedEncodingContainerProtocol {
 		private let base: AvroMapKeyedEncodingContainer<Key>
 
 		init(base: AvroMapKeyedEncodingContainer<Key>) {
