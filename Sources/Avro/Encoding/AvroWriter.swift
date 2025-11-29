@@ -82,8 +82,8 @@ final class AvroWriter {
 		#if compiler(>=6.2)
 			// Swift 6.2+ compilers
 
-			#if os(iOS) || os(macOS) || os(tvOS) || os(watchOS)
-				if #available(iOS 26.0, macOS 26.0, watchOS 26.0, tvOS 26.0, visionOS 1.0, *) {
+			#if os(iOS) || os(macOS) || os(tvOS) || os(watchOS) || os(visionOS)
+				if #available(iOS 26.0, macOS 26.0, watchOS 26.0, tvOS 26.0, visionOS 26.0, *) {
 					writeVarUInt_inlineArray(value)
 				} else {
 					writeVarUInt_fallback(value)
@@ -108,7 +108,7 @@ final class AvroWriter {
 	}
 
 	#if compiler(>=6.2)
-		@available(iOS 26.0, macOS 26.0, watchOS 26, tvOS 26, *)
+		@available(iOS 26.0, macOS 26.0, watchOS 26, tvOS 26, visionOS 26, *)
 		@inline(__always)
 		private func writeVarUInt_inlineArray(_ value: UInt64) {
 			var tmp: InlineArray<10, UInt8> = .init(repeating: 0)
