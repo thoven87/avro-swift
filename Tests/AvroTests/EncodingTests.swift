@@ -164,4 +164,28 @@ struct RecordEncodingTests {
 		let expected = MultiTypeUnionFixture.serialized
 		#expect(avroData == expected)
 	}
+
+	@Test("Message Union Record - encode text payload")
+	func messageUnionTextPayloadEncode() throws {
+		let value = MessageUnionFixture.textMessageInstance
+		let avroData = try AvroEncoder(schema: MessageUnionFixture.Message.avroSchema).encode(value)
+		let expected = MessageUnionFixture.textMessageSerialized
+		#expect(avroData == expected)
+	}
+
+	@Test("Message Union Record - encode image payload")
+	func messageUnionImagePayloadEncode() throws {
+		let value = MessageUnionFixture.imageMessageInstance
+		let avroData = try AvroEncoder(schema: MessageUnionFixture.Message.avroSchema).encode(value)
+		let expected = MessageUnionFixture.imageMessageSerialized
+		#expect(avroData == expected)
+	}
+
+	@Test("Message Union Record - encode data payload")
+	func messageUnionDataPayloadEncode() throws {
+		let value = MessageUnionFixture.dataMessageInstance
+		let avroData = try AvroEncoder(schema: MessageUnionFixture.Message.avroSchema).encode(value)
+		let expected = MessageUnionFixture.dataMessageSerialized
+		#expect(avroData == expected)
+	}
 }

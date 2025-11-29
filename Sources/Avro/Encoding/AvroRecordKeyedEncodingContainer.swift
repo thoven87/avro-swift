@@ -9,7 +9,6 @@ struct AvroRecordKeyedEncodingContainer<Key: CodingKey>: KeyedEncodingContainerP
 	var codingPath: [CodingKey]
 	var fields: [AvroSchemaDefinition.Field]
 	var writer: AvroWriter
-	var allKeys: [Key] { fields.compactMap { Key(stringValue: $0.name) } }
 
 	init(fields: [AvroSchemaDefinition.Field], writer: inout AvroWriter, codingPath: [CodingKey]) {
 		self.fields = fields

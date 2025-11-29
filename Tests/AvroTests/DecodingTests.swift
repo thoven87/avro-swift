@@ -187,11 +187,35 @@ struct RecordDecodingTests {
 		#expect(decoded == NullableUnionFixture.instance)
 	}
 
-	@Test("Multi-Type Union Record - decode with union type", .disabled("Unions not implemented"))
+	@Test("Multi-Type Union Record - decode with union type")
 	func multiTypeUnionDecode() throws {
 		let data = MultiTypeUnionFixture.serialized
 		let decoded = try AvroDecoder(schema: MultiTypeUnionFixture.Def.avroSchema)
 			.decode(MultiTypeUnionFixture.Def.self, from: data)
 		#expect(decoded == MultiTypeUnionFixture.instance)
+	}
+
+	@Test("Message Union Record - decode text payload")
+	func messageUnionTextPayloadDecode() throws {
+		let data = MessageUnionFixture.textMessageSerialized
+		let decoded = try AvroDecoder(schema: MessageUnionFixture.Message.avroSchema)
+			.decode(MessageUnionFixture.Message.self, from: data)
+		#expect(decoded == MessageUnionFixture.textMessageInstance)
+	}
+
+	@Test("Message Union Record - decode image payload")
+	func messageUnionImagePayloadDecode() throws {
+		let data = MessageUnionFixture.imageMessageSerialized
+		let decoded = try AvroDecoder(schema: MessageUnionFixture.Message.avroSchema)
+			.decode(MessageUnionFixture.Message.self, from: data)
+		#expect(decoded == MessageUnionFixture.imageMessageInstance)
+	}
+
+	@Test("Message Union Record - decode data payload")
+	func messageUnionDataPayloadDecode() throws {
+		let data = MessageUnionFixture.dataMessageSerialized
+		let decoded = try AvroDecoder(schema: MessageUnionFixture.Message.avroSchema)
+			.decode(MessageUnionFixture.Message.self, from: data)
+		#expect(decoded == MessageUnionFixture.dataMessageInstance)
 	}
 }

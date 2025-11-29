@@ -53,7 +53,13 @@ final class _AvroDecodingBox: Decoder {
 
 			case .logical(type: .decimal, underlying: .bytes):
 				fatalError("Decimals are not handled at the moment")
-
+			case .union(let schemas):
+				let container = AvroUnionKeyedDecodingContainer<Key>(
+					reader: reader,
+					unionSchemas: schemas,
+					codingPath: codingPath
+				)
+				return .init(container)
 			default:
 				fatalError("Schema is not a record or map but a \(schema)")
 		}
