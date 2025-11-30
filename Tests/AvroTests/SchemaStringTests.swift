@@ -119,7 +119,6 @@ struct SchemaStringTests {
 	@Test("avroSchemaString handles complex nested structures")
 	func testAvroSchemaStringComplexFixture() throws {
 		let schemaString = try ComplexFixture.Def.avroSchemaString
-
 		let data = try #require(schemaString.data(using: .utf8))
 		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
 		#expect(json != nil)
@@ -136,5 +135,57 @@ struct SchemaStringTests {
 		#expect(fieldNames?.contains("tags") == true)
 		#expect(fieldNames?.contains("nestedData") == true)
 		#expect(fieldNames?.contains("arrayOfMaps") == true)
+	}
+
+	@Test("avroSchemaString handles nullable union types")
+	func testAvroSchemaStringNullableUnion() throws {
+		let schemaString = try NullableUnionFixture.Def.avroSchemaString
+
+		let data = try #require(schemaString.data(using: .utf8))
+		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+		#expect(json != nil)
+
+		#expect(json?["type"] as? String == "record")
+		#expect(json?["name"] as? String == "Def")
+
+		let fields = json?["fields"] as? [[String: Any]]
+		#expect(fields?.count == 3)
+
+		let optionalNameField = fields?.first { ($0["name"] as? String) == "optionalName" }
+		let optionalNameType = optionalNameField?["type"] as? [Any]
+		#expect(optionalNameType != nil)
+		#expect(optionalNameType?.count == 2)
+		#expect(optionalNameType?.contains { ($0 as? String) == "null" } == true)
+		#expect(optionalNameType?.contains { ($0 as? String) == "string" } == true)
+
+		let optionalEmailField = fields?.first { ($0["name"] as? String) == "optionalEmail" }
+		let optionalEmailType = optionalEmailField?["type"] as? [Any]
+		#expect(optionalEmailType != nil)
+		#expect(optionalEmailType?.count == 2)
+		#expect(optionalEmailType?.contains { ($0 as? String) == "null" } == true)
+		#expect(optionalEmailType?.contains { ($0 as? String) == "string" } == true)
+	}
+
+	@Test("avroSchemaString handles multi-type union types")
+	func testAvroSchemaStringMultiTypeUnion() throws {
+		let schemaString = try MultiTypeUnionFixture.Def.avroSchemaString
+
+		let data = try #require(schemaString.data(using: .utf8))
+		let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+		#expect(json != nil)
+
+		#expect(json?["type"] as? String == "record")
+		#expect(json?["name"] as? String == "Def")
+
+		let fields = json?["fields"] as? [[String: Any]]
+		#expect(fields?.count == 2)
+
+		let valueField = fields?.first { ($0["name"] as? String) == "value" }
+		let valueType = valueField?["type"] as? [Any]
+		#expect(valueType != nil)
+		#expect(valueType?.count == 3)
+		#expect(valueType?.contains { ($0 as? String) == "int" } == true)
+		#expect(valueType?.contains { ($0 as? String) == "long" } == true)
+		#expect(valueType?.contains { ($0 as? String) == "double" } == true)
 	}
 }
