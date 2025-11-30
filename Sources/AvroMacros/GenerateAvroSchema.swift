@@ -12,7 +12,7 @@ import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
 /// A macro to automatically generate an Avro Schema for an object.
-public struct GenerateAvroSchema: MemberMacro {
+public struct GenerateAvroSchema: MemberMacro, ExtensionMacro {
 	public static func expansion(
 		of attribute: AttributeSyntax,
 		providingMembersOf declaration: some DeclGroupSyntax,
@@ -314,5 +314,24 @@ public struct GenerateAvroSchema: MemberMacro {
 		let severity: DiagnosticSeverity
 		var diagnosticID: MessageID { .init(domain: "GenerateAvroSchema", id: "invalid-logical-type") }
 		var messageText: String { message }
+	}
+
+	public static func expansion(
+		of node: AttributeSyntax,
+		attachedTo declaration: some DeclGroupSyntax,
+		providingExtensionsOf type: some TypeSyntaxProtocol,
+		conformingTo protocols: [TypeSyntax],
+		in context: some MacroExpansionContext
+	) throws -> [ExtensionDeclSyntax] {
+		let avroProtocolExtension: DeclSyntax =
+			"""
+			extension \(type.trimmed): AvroProtocol {}
+			"""
+
+		guard let extensionDecl = avroProtocolExtension.as(ExtensionDeclSyntax.self) else {
+			return []
+		}
+
+		return [extensionDecl]
 	}
 }

@@ -1,4 +1,5 @@
 @attached(member, names: arbitrary)
+@attached(extension, conformances: AvroProtocol)
 public macro AvroSchema() = #externalMacro(module: "AvroMacros", type: "GenerateAvroSchema")
 
 @attached(member, names: arbitrary)
