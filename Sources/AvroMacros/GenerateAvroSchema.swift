@@ -100,6 +100,14 @@ public struct GenerateAvroSchema: MemberMacro, ExtensionMacro {
 			}
 			"""
 
+		let schemaStringSource = """
+			public static var avroSchemaString: String {
+				get throws {
+					try avroSchema.toJSONString()
+				}
+			}
+			"""
+
 		let encodeSource = """
 			public func encode(to encoder: Encoder) throws {
 				var container = encoder.container(keyedBy: CodingKeys.self)
@@ -109,6 +117,7 @@ public struct GenerateAvroSchema: MemberMacro, ExtensionMacro {
 
 		return [
 			DeclSyntax(stringLiteral: schemaSource),
+			DeclSyntax(stringLiteral: schemaStringSource),
 			DeclSyntax(stringLiteral: encodeSource)
 		]
 	}

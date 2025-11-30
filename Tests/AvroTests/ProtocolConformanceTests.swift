@@ -10,6 +10,7 @@ import Testing
 
 @Suite("Protocol Conformance Tests")
 struct ProtocolConformanceTests {
+
 	@AvroSchema
 	struct TestRecord: Codable {
 		let id: Int
